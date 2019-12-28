@@ -1,89 +1,58 @@
-parse = require('co-body');
 var sqlite3 = require('sqlite3').verbose();
+const db = require('../../db');
+const bodyParser = require('koa-bodyparser');
 
 
-
-
-
-var login1 = exports.login = function *login(){    
-    var body1 = yield parse(this);  
-    console.log('entra');
-    this.body = {                    
-        data: 'pepe'
-    };
-    
-//    var user = yield platform.users.loginN(body.email,body.password);
-
-//    if (user) {
-//        let userRet = {};
-//        userRet.name = user.name;
-//        userRet.email = user.email;
-//        userRet.perfil = user.TipoUserId;
-//        userRet.isAdmin = user.TipoUserId == 1;
-//        userRet.minSession = token.minSession;
-//        userRet.token = token.OnlygenToken(userRet);
-     
-//        this.body = { 
-//            data : userRet
-//        };
-//    }
-//    else {
-//        this.body = {
-//            data: null
-//        };
-//    }
-  
-}; 
-
-
-const login = async (ctx,next) => {
-    ctx.body = 'login!';
-    await next();
-}
 
 const getAll = async (ctx,next) => {
 
-    try{
-        
-        var db = new sqlite3.Database('ppraga.db');
-        let sql = `SELECT * from jugador`;
-     
-        
-        db.all(sql, [], (err, rows) => {
-        if (err) {
-            console.log(err); 
-            ctx.body = err;
-        }
-        console.log(rows[0]); 
-        ctx.body ={users: '1'};
-       
-        });
+    const users = await db
+    .select(
+        'jugador.*',
+        'posicion.descripcion as posicion',
+        'perfil.descripcion as perfil'
+        )
+    .from('jugador')
+    .innerJoin('posicion', 'jugador.idposicion', '=', 'posicion.id')     
+    .innerJoin('perfil', 'jugador.idperfil', '=', 'perfil.id') 
 
-        db.close();
+    users.forEach(user => {
+        delete user.password;
+        delete user.passwordHas;
+    })
 
-    }
-    catch(err){
-        console.log(err); 
-    }
+    ctx.body = JSON.stringify(users);
+    
 }
 
 
-const getAll1 = async (ctx,next) => {
+const addJugador = async (ctx,next) => {
+    const Newuser = ctx.request.body;
+    delete Newuser.id;
     
-    ctx.body = {users: '1'};
-};
+    Newuser['id'] = await db('jugador').insert(Newuser);
+
+    ctx.body = Newuser;
+
+
+}
+
+
+
+const deleteJugador = async (ctx,next) => {
+    const id=ctx.params.id;
+
+    const sal = await db('jugador').where('id',id).del();
+    console.log(sal);
+
+    ctx.body = JSON.stringify(sal);
+
+}
+
+
 
 exports.register = function(router){
-    router.get('/aure', (ctx, next) => {
-        ctx.body = 'aure!';
-      });
-
-
-    router.post('/login', login);
-    // router.get('/users/:userId', show);
     router.get('/jugadores', getAll);
-    router.get('/jugadores1', getAll1);
-    // router.post('/users', create);     
-    // router.post('/users/:userId', update);
-    // router.delete('/users/:userId', destroy);
+    router.post('/jugadores', bodyParser(), addJugador);
+    router.delete('/jugadores/:id', bodyParser(), deleteJugador);
 };
