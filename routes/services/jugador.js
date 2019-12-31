@@ -37,13 +37,30 @@ const addJugador = async (ctx,next) => {
 
 }
 
+const updateJugador = async (ctx,next) => {
+    try{
+        const user = ctx.request.body;
+        sal = await db('jugador').where('id',user.id).update(user);
+       
+        ctx.body = sal;
+        ctx.body = JSON.stringify(sal);
+    }
+    catch(err){
+        ctx.throw(409, err.stack);
+        
+    }
+    
+
+}
+
+
 
 
 const deleteJugador = async (ctx,next) => {
     const id=ctx.params.id;
 
     const sal = await db('jugador').where('id',id).del();
-    console.log(sal);
+   
 
     ctx.body = JSON.stringify(sal);
 
@@ -54,5 +71,6 @@ const deleteJugador = async (ctx,next) => {
 exports.register = function(router){
     router.get('/jugadores', getAll);
     router.post('/jugadores', bodyParser(), addJugador);
+    router.put('/jugadores', bodyParser(), updateJugador);
     router.delete('/jugadores/:id', bodyParser(), deleteJugador);
 };
