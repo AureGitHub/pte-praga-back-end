@@ -12,7 +12,7 @@ const login  = async (ctx) => {
 
    
 
-    const dbUser = await db.first(['id', 'alias', 'nombre', 'email','idperfil','passwordHash'])  
+    const dbUser = await db.first(['id', 'alias', 'nombre', 'email','idperfil','idestado','passwordHash'])  
     .from('jugador')      
     .where({ email });
     

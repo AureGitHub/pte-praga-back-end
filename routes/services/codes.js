@@ -35,11 +35,28 @@ const getPosicion = async (ctx,next) => {
     
 }
 
+const getEstadoJugdor = async (ctx,next) => {
+
+    const posiciones = await db
+    .select(        
+        'jugador_estado.id as value',
+        'jugador_estado.descripcion as label'
+        )
+    .from('jugador_estado');    
+
+    posiciones.unshift(selecciones);
+
+    ctx.body = JSON.stringify(posiciones);
+    
+}
+
 
 
 
 exports.register = function(router){
     router.get('/posicion', getPosicion);
     router.get('/perfil', getPerfil);
+    router.get('/estadoJugador', getEstadoJugdor);
+    
 
 };
