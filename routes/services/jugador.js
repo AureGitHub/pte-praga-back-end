@@ -27,8 +27,7 @@ const getAll = async (ctx,next) => {
         delete user.passwordHas;
     })
 
-    ctx.body = JSON.stringify(users);
-    
+    ctx.state['body'] ={data : users, error: false};    
 }
 
 
@@ -53,9 +52,8 @@ const registerJugador =async (ctx,next) => {
     delete Newuser.password;
     delete Newuser.confirm_password;
     Newuser['id'] = await db('jugador').insert(Newuser);
-    // passwordHash
-    ctx.body = Newuser;
-       
+    // passwordHash    
+    ctx.state['body'] ={data : Newuser, error: false};
     
 
 };
@@ -63,10 +61,9 @@ const registerJugador =async (ctx,next) => {
 const updateJugador = async (ctx,next) => {
     try{
         const user = ctx.request.body;
-        sal = await db('jugador').where('id',user.id).update(user);
-       
-        ctx.body = sal;
-        ctx.body = JSON.stringify(sal);
+        sal = await db('jugador').where('id',user.id).update(user);       
+        ctx.state['body'] ={data : sal, error: false};
+
     }
     catch(err){
         ctx.throw(409, err.stack);
@@ -84,8 +81,7 @@ const deleteJugador = async (ctx,next) => {
 
     const sal = await db('jugador').where('id',id).del();
    
-
-    ctx.body = JSON.stringify(sal);
+    ctx.state['body'] ={data : sal, error: false};
 
 }
 
@@ -100,10 +96,8 @@ const sendMail = async (ctx,next) => {
       }
     
     );
-    
-    console.log("Message sent: %s", info.messageId);
 
-    ctx.body = info.messageId;
+    ctx.state['body'] ={data : info.messageId, error: false};    
 
 }
 
@@ -113,9 +107,9 @@ const sendMail = async (ctx,next) => {
 
 exports.register = function(router){
     router.get('/sendMail', awaitErorrHandlerFactory(sendMail));
-    router.get('/jugadores', getAll);
-    router.post('/jugadores', bodyParser(), addJugador);
-    router.post('/registro', bodyParser(), registerJugador);
-    router.put('/jugadores', bodyParser(), updateJugador);
-    router.delete('/jugadores/:id', bodyParser(), deleteJugador);
+    router.get('/jugadores', awaitErorrHandlerFactory(getAll));
+    router.post('/jugadores', bodyParser(), awaitErorrHandlerFactory(addJugador));
+    router.post('/registro', bodyParser(), awaitErorrHandlerFactory(registerJugador));
+    router.put('/jugadores', bodyParser(), awaitErorrHandlerFactory(updateJugador));
+    router.delete('/jugadores/:id', bodyParser(), awaitErorrHandlerFactory(deleteJugador));
 };

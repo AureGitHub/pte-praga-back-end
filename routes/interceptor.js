@@ -3,7 +3,8 @@ const jwt = require("jwt-simple");
 const variable = require('../utilities/variables');
 const db = require('../db');
 
-var GestionPermisos=async  (ctx,perfiles)=>{  
+
+var GestionPermisos=async  (ctx)=>{  
   
     var token = ctx.request.headers[variable.KeySecure];
     if(!token){
@@ -31,10 +32,25 @@ var GestionPermisos=async  (ctx,perfiles)=>{
       ctx.throw(403, 'token de seguridad incorrecto');
     }
   
+    const item_matchedRoute = require('./secure').secure.find((a)=> a._matchedRoute === ctx._matchedRoute);
+
+    if(item_matchedRoute == null){
+      ctx.throw(403, 'no autorizado');      
+    }
+
+    if(variable.SecureActivated){
+
+      var createToken =tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
+
+        const token = createToken.token;
+        const expire = createToken.expire;
+        ctx.state[variable.KeySecure]={token, expire}; 
+      
+    }
   
-    if(!perfiles.find(a=> a===userInToken.idperfil)){
-          ctx.throw(403, 'no autorizado');      
-      }
+    // if(!perfiles.find(a=> a===userInToken.idperfil)){
+    //       ctx.throw(403, 'no autorizado');      
+    //   }
     return userInToken; 
   
   }
@@ -45,9 +61,9 @@ const awaitErorrHandlerFactory = middleware => {
     return async (ctx, next) => {
       try {
   
-        const perfiles=[1,2,3];
+        //const perfiles=[1,2,3];
         if(variable.SecureActivated){
-          var userInToken=await GestionPermisos(ctx,perfiles);
+          var userInToken=await GestionPermisos(ctx);
         }
   
         

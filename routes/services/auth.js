@@ -37,7 +37,7 @@ const login  = async (ctx) => {
         const token = createToken.token;
         const expire = createToken.expire;
 
-        ctx.state['body'] ={data : true, error: false};
+        ctx.state['body'] ={data : dbUser, error: false};
         ctx.state[variable.KeySecure]={token, expire}; 
 
         // ctx.body = JSON.stringify(
