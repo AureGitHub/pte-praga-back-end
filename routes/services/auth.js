@@ -1,11 +1,20 @@
-const jwt = require('jsonwebtoken');
+
 const db = require('../../db');
 const bcrypt = require('../../utilities/bcrypt');
 const bodyParser = require('koa-bodyparser');
+const tokenGen = require('../../utilities/token');
+const variable=require('../../utilities/variables');
+
+
+
+
 
 const login  = async (ctx) => {
 
     const { email, password } = ctx.request.body;  
+
+    console.log(password);
+
 
     if (!email) ctx.throw(422, 'email required.');  
     if (!password) ctx.throw(422, 'Password required.');
@@ -16,25 +25,30 @@ const login  = async (ctx) => {
     .from('jugador')      
     .where({ email });
     
-    console.log(dbUser);
 
-
-    if (!dbUser) ctx.throw(401, 'Credenciales incorrectas.');
+    if (!dbUser) ctx.throw(401, 'Credenciales incorrectas 1.');
 
     if (await bcrypt.compare(password, dbUser.passwordHash)) {
 
         delete dbUser.passwordHash;
 
-        const payload = { sub: dbUser.id };  
-        const token = jwt.sign(payload, 'secret');  
-        ctx.body = JSON.stringify(
-            {data: dbUser, token});
+        var createToken =tokenGen.OnlygenToken(dbUser.id, ctx.request.ip); 
+
+        const token = createToken.token;
+        const expire = createToken.expire;
+
+        ctx.state['body'] ={data : true, error: false};
+        ctx.state[variable.KeySecure]={token, expire}; 
+
+        // ctx.body = JSON.stringify(
+        //     {data: dbUser, token, expire});
     }else {
         ctx.throw(401, 'Credenciales incorrectas.');
       }
     
 
   };
+
 
 
   exports.register = function(router){    

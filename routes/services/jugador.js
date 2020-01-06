@@ -3,6 +3,9 @@ const db = require('../../db');
 const bodyParser = require('koa-bodyparser');
 const bcrypt = require('./../../utilities/bcrypt');
 const myConstants= require('./../../utilities/myConstants');
+const transporter = require('./../../utilities/email');
+
+const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactory;
 
 const getAll = async (ctx,next) => {
 
@@ -86,9 +89,30 @@ const deleteJugador = async (ctx,next) => {
 
 }
 
+const sendMail = async (ctx,next) => {
+
+    let info = await transporter.sendMail({
+        from: '"Fred Foo 👻" <foo@example.com>', // sender address
+        to: "aure.desande@gmail.com", // list of receivers
+        subject: "Hello ✔", // Subject line
+        text: "Hello world?", // plain text body
+        html: "<b>Hello world?</b>" // html body
+      }
+    
+    );
+    
+    console.log("Message sent: %s", info.messageId);
+
+    ctx.body = info.messageId;
+
+}
+
+
+
 
 
 exports.register = function(router){
+    router.get('/sendMail', awaitErorrHandlerFactory(sendMail));
     router.get('/jugadores', getAll);
     router.post('/jugadores', bodyParser(), addJugador);
     router.post('/registro', bodyParser(), registerJugador);
