@@ -42,9 +42,9 @@ var GestionPermisos=async  (ctx)=>{
 
       var createToken =tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
 
-        const tokenOut = createToken.token;
+        const token = createToken.token;
         const expire = createToken.expire;
-        ctx.state[variable.KeySecure]={token: tokenOut, expire, user: userInToken}; 
+        ctx.state[variable.KeySecure]={token, expire, user: userInToken}; 
       
     }
   
