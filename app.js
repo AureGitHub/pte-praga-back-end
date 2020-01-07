@@ -12,7 +12,7 @@ const variable=require('./utilities/variables');
 var app = new Koa();
 app.use(cors());
 
-app.use(errorHandler);
+
 
 app.use(async (ctx, next) => {
     const start = Date.now();
@@ -32,6 +32,8 @@ app.use(async (ctx, next) => {
     //ctx.set(variable.KeySecure, JSON.stringify(ctx.state[variable.KeySecure]));
 
 });
+
+app.use(errorHandler);
 
 app.use(router);
 

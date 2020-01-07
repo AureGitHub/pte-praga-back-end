@@ -6,6 +6,7 @@ require('./services/auth').register(router);
 require('./services/codes').register(router);
 
 require('./services/jugador').register(router);
+require('./services/partido').register(router);
 
 
 module.exports = router.middleware();

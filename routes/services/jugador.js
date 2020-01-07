@@ -1,9 +1,9 @@
-var sqlite3 = require('sqlite3').verbose();
 const db = require('../../db');
 const bodyParser = require('koa-bodyparser');
 const bcrypt = require('./../../utilities/bcrypt');
 const myConstants= require('./../../utilities/myConstants');
 const transporter = require('./../../utilities/email');
+const uuidv4 = require('uuid/v4');
 
 const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactory;
 
@@ -86,21 +86,7 @@ const deleteJugador = async (ctx,next) => {
 
 }
 
-const sendMail = async (ctx,next) => {
 
-    let info = await transporter.sendMail({
-        from: '"Fred Foo 👻" <foo@example.com>', // sender address
-        to: "aure.desande@gmail.com", // list of receivers
-        subject: "Hello ✔", // Subject line
-        text: "Hello world?", // plain text body
-        html: "<b>Hello world?</b>" // html body
-      }
-    
-    );
-
-    ctx.state['body'] ={data : info.messageId, error: false};    
-
-}
 
 const cambiarPassword = async (ctx,next) => {
 
@@ -116,16 +102,101 @@ const cambiarPassword = async (ctx,next) => {
 
 }
 
+const pedirCodigoEmail = async (ctx,next) => {
+
+    
+    const idUser =  ctx.state['idUser'];
+
+    const user = await db.first(['email'])  
+    .from('jugador')      
+    .where({ id: idUser });
+
+    const uuid = uuidv4();
+
+    // let info = await transporter.sendMail({
+    //     from: '"sunday praga sunday 👻" <sunday.praga@padel.com>', // sender address
+    //     to: user.email, // list of receivers
+    //     subject: "Solicitud de confirmación de correo sunday praga ✔", // Subject line
+    //     text: 'Hola, este es el código para confirmar tu email: ' + uuid, // plain text body
+    //     html: 'Hola, este es el código para confirmar tu email: <b>' + uuid + '</b>' // html body
+    //   }
+    
+    // );
+       
+
+    const sal = await db('jugador_conf_email').where('idUser',idUser).del();   
+    const user_uuid = await db('jugador_conf_email').insert({idUser, uuid});
+
+    ctx.state['body'] ={data : sal, error: false};    
+
+}
+
+
+
+const confirmarEmail = async (ctx,next) => {
+
+
+    const form = ctx.request.body;    
+    
+    const idUser =  ctx.state['idUser'];
+
+    const user = await db.first(['uuid'])  
+    .from('jugador_conf_email')      
+    .where({ idUser });
+
+    if(!user){
+        ctx.throw(401, 'No ha pedido el código de confirmación');
+    }
 
 
 
 
-exports.register = function(router){
-    router.get('/sendMail', awaitErorrHandlerFactory(sendMail));
+    if(user.uuid === form.codConfirmEmail){
+        
+        const idestado = 4;
+
+        db.transaction(async function (trx) {
+
+            try {
+
+
+                const sal1 = await trx('jugador_conf_email').where('idUser',idUser).del();
+                const sal2  = await trx('jugador').where('id',idUser).update({idestado}); 
+
+    
+            } catch (err) {
+                await  ctx.throw(401, err.message);
+            }
+        })
+
+
+        
+        ctx.state['body'] ={data : true, error: false}; 
+
+    } else{
+        ctx.state['body'] ={data : false, error: false};    
+    }
+
+  
+
+    
+
+    
+
+}
+
+
+
+
+
+exports.register = function(router){    
     router.get('/jugadores', awaitErorrHandlerFactory(getAll));
     router.post('/jugadores', bodyParser(), awaitErorrHandlerFactory(addJugador));
     router.post('/registro', bodyParser(), awaitErorrHandlerFactory(registerJugador));
     router.put('/jugadores', bodyParser(), awaitErorrHandlerFactory(updateJugador));
     router.delete('/jugadores/:id', bodyParser(), awaitErorrHandlerFactory(deleteJugador));
     router.post('/cambiarPassword', bodyParser(), awaitErorrHandlerFactory(cambiarPassword));
+    router.get('/pedirCodigoEmail', bodyParser(), awaitErorrHandlerFactory(pedirCodigoEmail));
+    router.post('/confirmarEmail', bodyParser(), awaitErorrHandlerFactory(confirmarEmail));
+    
 };

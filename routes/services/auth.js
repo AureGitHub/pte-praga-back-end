@@ -12,19 +12,11 @@ const variable=require('../../utilities/variables');
 const login  = async (ctx) => {
 
     const { email, password } = ctx.request.body;  
-
-    console.log(password);
-
-
     if (!email) ctx.throw(422, 'email required.');  
     if (!password) ctx.throw(422, 'Password required.');
-
-   
-
     const dbUser = await db.first(['id', 'alias', 'nombre', 'email','idperfil','idestado','passwordHash'])  
     .from('jugador')      
     .where({ email });
-    
 
     if (!dbUser) ctx.throw(401, 'Credenciales incorrectas 1.');
 

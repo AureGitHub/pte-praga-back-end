@@ -38,15 +38,7 @@ var GestionPermisos=async  (ctx)=>{
       ctx.throw(403, 'no autorizado');      
     }
 
-    if(variable.SecureActivated){
 
-      var createToken =tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
-
-        const token = createToken.token;
-        const expire = createToken.expire;
-        ctx.state[variable.KeySecure]={token, expire, user: userInToken}; 
-      
-    }
   
     // if(!perfiles.find(a=> a===userInToken.idperfil)){
     //       ctx.throw(403, 'no autorizado');      
@@ -63,15 +55,30 @@ const awaitErorrHandlerFactory = middleware => {
   
         //const perfiles=[1,2,3];
         if(variable.SecureActivated){
-          var userInToken=await GestionPermisos(ctx);
+          var userInTokenDirty=await GestionPermisos(ctx);
         }
   
         
-        ctx.state['idUser'] = userInToken.id;
+        ctx.state['idUser'] = userInTokenDirty.id;
 
   
         await middleware(ctx, next);
   
+
+        if(variable.SecureActivated){
+
+          const userInToken = await db.first(['id', 'alias', 'nombre', 'email','idperfil','idestado'])  
+          .from('jugador')      
+          .where({ id : userInTokenDirty.id });
+
+          var createToken =tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
+    
+            const token = createToken.token;
+            const expire = createToken.expire;
+            ctx.state[variable.KeySecure]={token, expire, user: userInToken}; 
+          
+        }
+
         
         // if(variable.SecureActivated){
         //   ctx.state[variable.KeySecure]=tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
