@@ -35,6 +35,9 @@ const getAll = async (ctx,next) => {
 const addJugador = async (ctx,next) => {
     const Newuser = ctx.request.body;
     delete Newuser.id;
+
+    Newuser.passwordHash = await  bcrypt.hash('123456');
+    Newuser.idestado = 2;  //debe cambiar la password
     
     Newuser['id'] = await db('jugador').insert(Newuser);
 
