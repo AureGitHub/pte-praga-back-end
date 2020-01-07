@@ -38,7 +38,7 @@ const addJugador = async (ctx,next) => {
     
     Newuser['id'] = await db('jugador').insert(Newuser);
 
-    ctx.body = Newuser;
+    ctx.state['body'] ={data : Newuser, error: false};
 
 
 }
