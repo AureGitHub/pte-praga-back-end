@@ -23,7 +23,7 @@ var GestionPermisos=async  (ctx)=>{
   
     //paso de user en claro.. utilizo el Id del user encriptado
   
-    const userInToken = await db.first(['id','idperfil'])  
+    const userInToken = await db.first(['id', 'alias', 'nombre', 'email','idperfil','idestado'])  
     .from('jugador')      
     .where({ id : decoded.idUser });
   
@@ -67,6 +67,8 @@ const awaitErorrHandlerFactory = middleware => {
         }
   
         
+        ctx.state['idUser'] = userInToken.id;
+
   
         await middleware(ctx, next);
   

@@ -104,6 +104,20 @@ const sendMail = async (ctx,next) => {
 
 }
 
+const cambiarPassword = async (ctx,next) => {
+
+    const UpdateuserPass = ctx.request.body;    
+    const passwordHash = await  bcrypt.hash(UpdateuserPass.password);
+    const idUser =  ctx.state['idUser'];
+    const idestado = 4;
+
+
+    sal = await db('jugador').where('id',idUser).update({passwordHash,idestado});   
+
+    ctx.state['body'] ={data : sal, error: false};    
+
+}
+
 
 
 
@@ -115,4 +129,5 @@ exports.register = function(router){
     router.post('/registro', bodyParser(), awaitErorrHandlerFactory(registerJugador));
     router.put('/jugadores', bodyParser(), awaitErorrHandlerFactory(updateJugador));
     router.delete('/jugadores/:id', bodyParser(), awaitErorrHandlerFactory(deleteJugador));
+    router.post('/cambiarPassword', bodyParser(), awaitErorrHandlerFactory(cambiarPassword));
 };
