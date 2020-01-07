@@ -32,7 +32,7 @@ var GestionPermisos=async  (ctx)=>{
       ctx.throw(403, 'token de seguridad incorrecto');
     }
   
-    const item_matchedRoute = require('./secure').secure.find((a)=> a._matchedRoute === ctx._matchedRoute);
+    const item_matchedRoute = require('./secure').secure.find((a)=>  ctx._matchedRoute.includes(a._matchedRoute));
 
     if(item_matchedRoute == null){
       ctx.throw(403, 'no autorizado');      
