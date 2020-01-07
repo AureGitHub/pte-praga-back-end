@@ -73,9 +73,9 @@ const awaitErorrHandlerFactory = middleware => {
         await middleware(ctx, next);
   
         
-        if(variable.SecureActivated){
-          ctx.state[variable.KeySecure]=tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
-        }
+        // if(variable.SecureActivated){
+        //   ctx.state[variable.KeySecure]=tokenGen.OnlygenToken(userInToken.id, ctx.request.ip); 
+        // }
   
   
         
