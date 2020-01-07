@@ -16,7 +16,7 @@ const getPerfil = async (ctx,next) => {
 
     perfiles.unshift(selecciones);
 
-    ctx.body = JSON.stringify(perfiles);
+    ctx.state['body'] ={data : perfiles, error: false}; 
     
 }
 
@@ -28,25 +28,23 @@ const getPosicion = async (ctx,next) => {
         'posicion.descripcion as label'
         )
     .from('posicion');    
-
-    posiciones.unshift(selecciones);
-
-    ctx.body = JSON.stringify(posiciones);
+    posiciones.unshift(selecciones);    
+    ctx.state['body'] ={data : posiciones, error: false}; 
     
 }
 
 const getEstadoJugdor = async (ctx,next) => {
 
-    const posiciones = await db
+    const estados = await db
     .select(        
         'jugador_estado.id as value',
         'jugador_estado.descripcion as label'
         )
     .from('jugador_estado');    
 
-    posiciones.unshift(selecciones);
+    estados.unshift(selecciones);
+    ctx.state['body'] ={data : estados, error: false}; 
 
-    ctx.body = JSON.stringify(posiciones);
     
 }
 
