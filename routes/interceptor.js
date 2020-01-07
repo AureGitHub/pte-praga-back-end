@@ -23,7 +23,7 @@ var GestionPermisos=async  (ctx)=>{
   
     //paso de user en claro.. utilizo el Id del user encriptado
   
-    const userInToken = await db.first(['idperfil'])  
+    const userInToken = await db.first(['id','idperfil'])  
     .from('jugador')      
     .where({ id : decoded.idUser });
   
