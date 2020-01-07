@@ -81,9 +81,7 @@ const updateJugador = async (ctx,next) => {
 
 const deleteJugador = async (ctx,next) => {
     const id=ctx.params.id;
-
-    const sal = await db('jugador').where('id',id).del();
-   
+    const sal = await db('jugador').where('id',id).del();   
     ctx.state['body'] ={data : sal, error: false};
 
 }

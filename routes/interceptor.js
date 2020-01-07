@@ -44,7 +44,7 @@ var GestionPermisos=async  (ctx)=>{
 
         const tokenOut = createToken.token;
         const expire = createToken.expire;
-        ctx.state[variable.KeySecure]={token: tokenOut, expire}; 
+        ctx.state[variable.KeySecure]={token: tokenOut, expire, user: userInToken}; 
       
     }
   
