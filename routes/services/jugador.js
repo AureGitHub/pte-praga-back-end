@@ -94,6 +94,48 @@ const deleteJugador = async (ctx,next) => {
 
 
 
+
+const cambiarPasswordForget = async (ctx,next) => {
+
+    const form = ctx.request.body;    
+    
+    
+
+    const confirm_jugador = await db.first(['idUser'])  
+    .from('jugador_confirmar')      
+    .where({ uuid :form.uuid });
+
+    if(!confirm_jugador){
+        ctx.throw(401, 'No ha pedido el código de confirmación');
+    }
+
+    const passwordHash = await  bcrypt.hash(form.password);
+
+    const idUser = confirm_jugador.idUser;
+
+    db.transaction(async function (trx) {
+
+        try {
+            const sal1 = await trx('jugador_confirmar').where('idUser',idUser).del();            
+            const sal3 = await trx('jugador').where('id',idUser).update({passwordHash});  
+
+
+        } catch (err) {
+            await  ctx.throw(401, err.message);
+        }
+    })
+
+
+    ctx.state['body'] ={data : false, error: false};  
+
+
+
+    
+
+     
+
+}
+
 const cambiarPassword = async (ctx,next) => {
 
     const UpdateuserPass = ctx.request.body;    
@@ -108,14 +150,8 @@ const cambiarPassword = async (ctx,next) => {
 
 }
 
-const pedirCodigoEmail = async (ctx,next) => {
 
-    
-    const idUser =  ctx.state['idUser'];
-
-    const user = await db.first(['email'])  
-    .from('jugador')      
-    .where({ id: idUser });
+const SaveCodigoConfirmacion = async (ctx,idUser, email) => {
 
     const uuid = uuidv4();
 
@@ -130,10 +166,41 @@ const pedirCodigoEmail = async (ctx,next) => {
     // );
        
 
-    const sal = await db('jugador_conf_email').where('idUser',idUser).del();   
-    const user_uuid = await db('jugador_conf_email').insert({idUser, uuid});
+    const sal = await db('jugador_confirmar').where('idUser',idUser).del();   
+    const user_uuid = await db('jugador_confirmar').insert({idUser, uuid});
 
     ctx.state['body'] ={data : sal, error: false};    
+
+}
+
+
+const pedirCodigoForgetPass = async (ctx,next) => {
+
+    const user = ctx.request.body;  
+
+    const userInDB = await db.first(['id'])  
+    .from('jugador')      
+    .where({ email: user.email });
+
+    if(!userInDB){
+        ctx.throw(403, 'no existe el email proporcionado (' + user.email + ')');
+    }
+
+
+    await SaveCodigoConfirmacion(ctx,userInDB.id, user.email);
+
+}
+
+const pedirCodigoEmail = async (ctx,next) => {
+
+    
+    const idUser =  ctx.state['idUser'];
+
+    const user = await db.first(['email'])  
+    .from('jugador')      
+    .where({ id: idUser });
+
+    await SaveCodigoConfirmacion(ctx,idUser, user.email);
 
 }
 
@@ -147,7 +214,7 @@ const confirmarEmail = async (ctx,next) => {
     const idUser =  ctx.state['idUser'];
 
     const user = await db.first(['uuid'])  
-    .from('jugador_conf_email')      
+    .from('jugador_confirmar')      
     .where({ idUser });
 
     if(!user){
@@ -166,7 +233,7 @@ const confirmarEmail = async (ctx,next) => {
             try {
 
 
-                const sal1 = await trx('jugador_conf_email').where('idUser',idUser).del();
+                const sal1 = await trx('jugador_confirmar').where('idUser',idUser).del();
                 const sal2  = await trx('jugador').where('id',idUser).update({idestado}); 
 
     
@@ -203,7 +270,9 @@ exports.register = function(router){
     router.delete('/jugadores/:id', bodyParser(), awaitErorrHandlerFactory(deleteJugador));
     router.post('/registro', bodyParser(), awaitErorrHandlerFactory(registerJugador));
     router.post('/cambiarPassword', bodyParser(), awaitErorrHandlerFactory(cambiarPassword));
+    router.post('/cambiarPasswordForget', bodyParser(), cambiarPasswordForget);
     router.get('/pedirCodigoEmail', bodyParser(), awaitErorrHandlerFactory(pedirCodigoEmail));
+    router.post('/pedirCodigoForgetPass', bodyParser(), pedirCodigoForgetPass);
     router.post('/confirmarEmail', bodyParser(), awaitErorrHandlerFactory(confirmarEmail));
     
 };

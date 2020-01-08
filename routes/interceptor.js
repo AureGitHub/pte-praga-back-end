@@ -17,23 +17,44 @@ var SetToken = async (ctx,idUser) => {
   
 }
 
+
+var businessRules = async  (ctx,userInToken)=>{ 
+
+  switch(ctx._matchedRoute){
+    case '/jugadores':
+      // si el que modifica no es un admin, solo se puede moficar a si mismo            
+      if(ctx.request.method==='PUT'){
+        const userToUpdate = ctx.request.body;
+
+        if(userInToken.idperfil!=1 && userToUpdate.id != userInToken.id){
+          //un no admin intenta modificar a otro jugador
+          ctx.throw(403, 'No tiene permiso para modificar a otro jugador');
+        }
+
+
+      }
+
+      break;
+  }
+
+ }
+
+
 var GestionPermisos = async  (ctx)=>{  
   
 
   const item_matchedRoute = require('./secure').secure.find((a)=>  ctx._matchedRoute === a._matchedRoute);
 
-  if(item_matchedRoute && item_matchedRoute.esPublico){
-    return null;
+  if(!item_matchedRoute){
+    ctx.throw(403, 'no tiene definida la seguridad (' + ctx._matchedRoute + ')');   
   }
 
-
-
     var token = ctx.request.headers[variable.KeySecure];
-    if(!token){
-      ctx.throw(403, 'no se puede obtener la key de seguridad');
-    }
-  
-    var decoded = jwt.decode(token, variable.JWT_SECRET);
+
+    if(token){
+      // si tiene token, tiene que ser todo correcto, aunque sea publico
+
+      var decoded = jwt.decode(token, variable.JWT_SECRET);
   
     if (decoded.expire <= Date.now()) {
       ctx.throw(403, 'su sesión ha expirado');
@@ -41,9 +62,7 @@ var GestionPermisos = async  (ctx)=>{
   
     if(!decoded.idUser){
       ctx.throw(403, 'token de seguridad incorrecto');
-    }
-  
-    //paso de user en claro.. utilizo el Id del user encriptado
+    } 
   
     const userInToken = await db.first(['id', 'idperfil'])  
     .from('jugador')      
@@ -74,8 +93,25 @@ var GestionPermisos = async  (ctx)=>{
       ctx.throw(403, 'no está autorizado para realizar esta operación'); 
      }
 
+     await businessRules(ctx,userInToken);
+
 
     return userInToken; 
+
+
+    } else{
+      if(!item_matchedRoute.esPublico){
+        // si no tiene token y no es publico => error
+        ctx.throw(403, 'no se puede obtener la key de seguridad');
+      }
+      else{
+        // es publico sin token
+        return null;
+      }
+    }
+
+      
+    
   
   }  
    
