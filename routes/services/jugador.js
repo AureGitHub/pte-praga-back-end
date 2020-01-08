@@ -155,15 +155,15 @@ const SaveCodigoConfirmacion = async (ctx,idUser, email) => {
 
     const uuid = uuidv4();
 
-    // let info = await transporter.sendMail({
-    //     from: '"sunday praga sunday 👻" <sunday.praga@padel.com>', // sender address
-    //     to: user.email, // list of receivers
-    //     subject: "Solicitud de confirmación de correo sunday praga ✔", // Subject line
-    //     text: 'Hola, este es el código para confirmar tu email: ' + uuid, // plain text body
-    //     html: 'Hola, este es el código para confirmar tu email: <b>' + uuid + '</b>' // html body
-    //   }
+    let info = await transporter.sendMail({
+        from: '"sunday praga sunday 👻" <sunday.praga@padel.com>', // sender address
+        to: email, // list of receivers
+        subject: "Solicitud de confirmación de correo sunday praga ✔", // Subject line
+        text: 'Hola, este es el código para confirmar tu email: ' + uuid, // plain text body
+        html: 'Hola, este es el código para confirmar tu email: <b>' + uuid + '</b>' // html body
+      }
     
-    // );
+    );
        
 
     const sal = await db('jugador_confirmar').where('idUser',idUser).del();   
