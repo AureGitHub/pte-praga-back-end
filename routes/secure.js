@@ -1,46 +1,56 @@
 exports.secure =[
-    {
-        _matchedRoute : '/sendMail',
-        perfiles : [
-            {perfil : 1,  permisos : ['A']},
-            {perfil : 2,  permisos : ['R']}
-        ]
-    },
+   
+
+
     {
         _matchedRoute : '/jugadores',
+        esPublico: false,
         perfiles : [
-            {perfil : 1,  permisos : ['A']},
-            {perfil : 2,  permisos : ['R']}
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['PUT']}
+        ]
+    },
+
+    {
+        _matchedRoute : '/jugadores/:id',
+        esPublico: false,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['GET']}
         ]
     },
 
     {
         _matchedRoute : '/partidos',
+        esPublico: true,
         perfiles : [
-            {perfil : 1,  permisos : ['A']},
-            {perfil : 2,  permisos : ['A']}
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
         ]
     },
 
     {
         _matchedRoute : '/cambiarPassword',
+        esPublico: false,
         perfiles : [
-            {perfil : 1,  permisos : ['A']},
-            {perfil : 2,  permisos : ['A']}
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
         ]
     },
     {
         _matchedRoute : '/pedirCodigoEmail',
+        esPublico: false,
         perfiles : [
-            {perfil : 1,  permisos : ['A']},
-            {perfil : 2,  permisos : ['A']}
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
         ]
     },
     {
         _matchedRoute : '/confirmarEmail',
+        esPublico: false,
         perfiles : [
-            {perfil : 1,  permisos : ['A']},
-            {perfil : 2,  permisos : ['A']}
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
         ]
     },
 

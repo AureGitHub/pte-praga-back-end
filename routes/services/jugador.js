@@ -30,6 +30,15 @@ const getAll = async (ctx,next) => {
     ctx.state['body'] ={data : users, error: false};    
 }
 
+const getById = async (ctx,next) => {
+
+    const id=ctx.params.id;
+    const user = await db.first(['id','alias','nombre','email','idposicion']).from('jugador').where({id});    
+    ctx.state['body'] ={data : user, error: false};
+
+}
+
+
 
 
 const addJugador = async (ctx,next) => {
@@ -72,10 +81,7 @@ const updateJugador = async (ctx,next) => {
         ctx.throw(409, err.stack);
         
     }
-    
-
 }
-
 
 
 
@@ -191,10 +197,11 @@ const confirmarEmail = async (ctx,next) => {
 
 exports.register = function(router){    
     router.get('/jugadores', awaitErorrHandlerFactory(getAll));
-    router.post('/jugadores', bodyParser(), awaitErorrHandlerFactory(addJugador));
-    router.post('/registro', bodyParser(), awaitErorrHandlerFactory(registerJugador));
-    router.put('/jugadores', bodyParser(), awaitErorrHandlerFactory(updateJugador));
+    router.get('/jugadores/:id', awaitErorrHandlerFactory(getById));
+    router.post('/jugadores', bodyParser(), awaitErorrHandlerFactory(addJugador));    
+    router.put('/jugadores', bodyParser(), awaitErorrHandlerFactory(updateJugador));    
     router.delete('/jugadores/:id', bodyParser(), awaitErorrHandlerFactory(deleteJugador));
+    router.post('/registro', bodyParser(), awaitErorrHandlerFactory(registerJugador));
     router.post('/cambiarPassword', bodyParser(), awaitErorrHandlerFactory(cambiarPassword));
     router.get('/pedirCodigoEmail', bodyParser(), awaitErorrHandlerFactory(pedirCodigoEmail));
     router.post('/confirmarEmail', bodyParser(), awaitErorrHandlerFactory(confirmarEmail));
