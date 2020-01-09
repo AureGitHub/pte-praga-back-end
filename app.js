@@ -5,7 +5,17 @@ const router = require('./routes/route');
 const variable=require('./utilities/variables');
 
 
+const sendmail = require('sendmail')();
 
+sendmail({
+    from: 'no-reply@yourdomain.com',
+    to: 'auredecocccam@gmail.com',
+    subject: 'test sendmail',
+    html: 'Mail of test sendmail ',
+  }, function(err, reply) {
+    console.log(err && err.stack);
+    console.dir(reply);
+});
 
 
 
