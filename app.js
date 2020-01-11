@@ -5,10 +5,6 @@ const router = require('./routes/route');
 const variable=require('./utilities/variables');
 
 
-
-
-
-
 var app = new Koa();
 app.use(cors());
 
