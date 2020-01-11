@@ -30,6 +30,16 @@ exports.secure =[
     },
 
     {
+        _matchedRoute : '/partidos/:id',
+        esPublico: true,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
+        ]
+    },
+
+
+    {
         _matchedRoute : '/cambiarPassword',
         esPublico: false,
         perfiles : [
