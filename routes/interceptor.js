@@ -35,6 +35,22 @@ var businessRules = async  (ctx,userInToken)=>{
       }
 
       break;
+
+      case '/partidos1':
+      // si el que modifica no es un admin, solo se puede moficar a si mismo            
+      if(ctx.request.method==='PUT'){
+        const partidoToUpdate = ctx.request.body;
+
+        if(partidoToUpdate.idcreador != userInToken.id){
+          //un no admin intenta modificar a otro jugador
+          ctx.throw(403, 'No tiene permiso para modificar este partido');
+        }
+
+
+      }
+
+      break;
+
   }
 
  }
