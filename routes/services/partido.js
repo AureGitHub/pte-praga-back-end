@@ -52,7 +52,7 @@ const updatePartido = async (ctx,next) => {
         
         const partido = ctx.request.body;
 
-        console.log('dia :' + partido.dia);
+        ctx.throw(509, 'dia :' + partido.dia);
 
         partido.jugadorestotal = parseInt(partido.pistas) * 4;
 
