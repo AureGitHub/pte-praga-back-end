@@ -52,6 +52,8 @@ const updatePartido = async (ctx,next) => {
         
         const partido = ctx.request.body;
 
+        console.log('dia :' + partido.dia);
+
         partido.jugadorestotal = parseInt(partido.pistas) * 4;
 
         if(partido.dia.indexOf('Z')<0){
