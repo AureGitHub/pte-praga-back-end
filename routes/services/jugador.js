@@ -183,7 +183,7 @@ const pedirCodigoForgetPass = async (ctx,next) => {
     .where({ email: user.email });
 
     if(!userInDB){
-        ctx.throw(403, 'no existe el email proporcionado (' + user.email + ')');
+        ctx.throw(401, 'no existe el email proporcionado (' + user.email + ')');
     }
 
 

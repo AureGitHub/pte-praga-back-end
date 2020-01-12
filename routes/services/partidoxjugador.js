@@ -57,11 +57,11 @@ const add = async (ctx,next) => {
     const item = ctx.request.body;  
 
     const jugadoresEnPartido = await db
-    .first('jugadorestotal' ,'jugadorestotal')
+    .first('jugadoresapuntados' ,'jugadorestotal')
     .from('partido')
     .where({id :item.idpartido });
 
-    if(jugadoresEnPartido.jugadorestotal >= jugadoresEnPartido.jugadorestotal){
+    if(jugadoresEnPartido.jugadoresapuntados >= jugadoresEnPartido.jugadorestotal){
         ctx.throw(401, 'El partido está lleno');
     }
 
