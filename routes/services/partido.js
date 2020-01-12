@@ -52,6 +52,8 @@ const updatePartido = async (ctx,next) => {
         
         const partido = ctx.request.body;
 
+      
+
         partido.jugadorestotal = parseInt(partido.pistas) * 4;
 
         if(partido.dia.indexOf('Z')<0){
@@ -73,6 +75,8 @@ const updatePartido = async (ctx,next) => {
             
             partido.dia = new Date(partido.dia.toString());
             partido.dia = partido.dia.toLocaleString();
+
+            ctx.throw(509, 'dia :' + partido.dia);
 
             var hora = partido.dia.split(' ')[1].split(':')[0];
             var min = partido.dia.split(' ')[1].split(':')[1];
