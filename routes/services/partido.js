@@ -109,10 +109,14 @@ const updatePartido = async (ctx,next) => {
 
 
 
-
+const prueba = async (ctx,next) => {
+    const sal = await db('prueba').insert({id: 1, valor: 'pepe'});
+    ctx.state['body'] ={data : sal, error: false}; 
+}
 
 
 exports.register = function(router){    
+    router.get('/prueba', prueba);
     router.get('/partidos', awaitErorrHandlerFactory(getAll));
     router.get('/partidos/:id', awaitErorrHandlerFactory(getById));
     router.post('/partidos', bodyParser(), awaitErorrHandlerFactory(addPartido)); 
