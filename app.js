@@ -3,13 +3,13 @@ const cors = require('koa-cors');
 const errorHandler = require('./middleware/errorHandler');
 const router = require('./routes/route');
 const variable=require('./utilities/variables');
-
+require('dotenv').config()
 
 var app = new Koa();
 app.use(cors());
 
 
-
+console.log('process.env.NODE_ENV: '  + process.env.NODE_ENV);
 
 
 app.use(async (ctx, next) => {

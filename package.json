@@ -17,6 +17,7 @@
     "add-subtract-date": "^1.0.14",
     "bcrypt-nodejs": "0.0.3",
     "co-body": "^6.0.0",
+    "dotenv": "^8.2.0",
     "jsonwebtoken": "^8.5.1",
     "jwt-simple": "^0.5.6",
     "knex": "^0.20.4",
