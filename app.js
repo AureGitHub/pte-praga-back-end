@@ -9,7 +9,7 @@ var app = new Koa();
 app.use(cors());
 
 
-console.log('process.env.NODE_ENV: '  + process.env.NODE_ENV);
+console.log('process.env.USER: '  + process.env.USER);
 
 
 app.use(async (ctx, next) => {

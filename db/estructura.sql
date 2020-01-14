@@ -72,8 +72,7 @@ CREATE TABLE jugador_confirmar
 CREATE TABLE partido 
 (id serial PRIMARY KEY,
 idcreador INTEGER, 
-dia date NOT NULL, 
-hora time not null,
+dia timestamp with time zone NOT NULL,
 duracion INTEGER NOT NULL,
 pistas 
 INTEGER NOT NULL, 
