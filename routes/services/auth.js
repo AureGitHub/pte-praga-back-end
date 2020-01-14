@@ -14,15 +14,15 @@ const login  = async (ctx) => {
     const { email, password } = ctx.request.body;  
     if (!email) ctx.throw(422, 'email required.');  
     if (!password) ctx.throw(422, 'Password required.');
-    const dbUser = await db.first(['id', 'alias', 'nombre', 'email','idperfil','idestado','passwordHash'])  
+    const dbUser = await db.first(['id', 'alias', 'nombre', 'email','idperfil','idestado','passwordhash'])  
     .from('jugador')      
     .where({ email });
 
     if (!dbUser) ctx.throw(401, 'Credenciales incorrectas 1.');
 
-    if (await bcrypt.compare(password, dbUser.passwordHash)) {
+    if (await bcrypt.compare(password, dbUser.passwordhash)) {
 
-        delete dbUser.passwordHash;
+        delete dbUser.passwordhash;
 
         var createToken =tokenGen.OnlygenToken(dbUser.id, ctx.request.ip); 
 

@@ -45,7 +45,7 @@ const addJugador = async (ctx,next) => {
     const Newuser = ctx.request.body;
     delete Newuser.id;
 
-    Newuser.passwordHash = await  bcrypt.hash('123456');
+    Newuser.passwordhash = await  bcrypt.hash('123456');
     Newuser.idestado = 2;  //debe cambiar la password
     
     Newuser['id'] = await db('jugador').insert(Newuser);
@@ -59,12 +59,12 @@ const registerJugador =async (ctx,next) => {
     const Newuser = ctx.request.body;
     Newuser.idestado = 1; //debe confirmar email
     Newuser.idperfil = 2; //jugador
-    Newuser.passwordHash = await  bcrypt.hash(Newuser.password);
+    Newuser.passwordhash = await  bcrypt.hash(Newuser.password);
     delete Newuser.id;
     delete Newuser.password;
     delete Newuser.confirm_password;
     Newuser['id'] = await db('jugador').insert(Newuser);
-    // passwordHash    
+    // passwordhash    
     ctx.state['body'] ={data : Newuser, error: false};
     
 
@@ -109,15 +109,15 @@ const cambiarPasswordForget = async (ctx,next) => {
         ctx.throw(401, 'No ha pedido el código de confirmación');
     }
 
-    const passwordHash = await  bcrypt.hash(form.password);
+    const passwordhash = await  bcrypt.hash(form.password);
 
     const idUser = confirm_jugador.idUser;
 
     db.transaction(async function (trx) {
 
         try {
-            const sal1 = await trx('jugador_confirmar').where('idUser',idUser).del();            
-            const sal3 = await trx('jugador').where('id',idUser).update({passwordHash});  
+            const sal1 = await trx('jugador_confirmar').where('iduser',idUser).del();            
+            const sal3 = await trx('jugador').where('id',idUser).update({passwordhash});  
 
 
         } catch (err) {
@@ -139,12 +139,12 @@ const cambiarPasswordForget = async (ctx,next) => {
 const cambiarPassword = async (ctx,next) => {
 
     const UpdateuserPass = ctx.request.body;    
-    const passwordHash = await  bcrypt.hash(UpdateuserPass.password);
+    const passwordhash = await  bcrypt.hash(UpdateuserPass.password);
     const idUser =  ctx.state['idUser'];
     const idestado = 4;
 
 
-    sal = await db('jugador').where('id',idUser).update({passwordHash,idestado});   
+    sal = await db('jugador').where('id',idUser).update({passwordhash,idestado});   
 
     ctx.state['body'] ={data : sal, error: false};    
 

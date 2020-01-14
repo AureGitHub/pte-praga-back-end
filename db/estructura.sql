@@ -55,7 +55,7 @@ CREATE TABLE jugador
  alias TEXT NOT NULL UNIQUE, 
  nombre TEXT NOT NULL UNIQUE, 
  email TEXT NOT NULL UNIQUE, 
- passwordHash TEXT, 
+ passwordhash TEXT, 
  idperfil INTEGER NOT NULL, 
  idposicion INTEGER NOT NULL, 
  idestado INTEGER NOT NULL, 
@@ -64,9 +64,9 @@ CREATE TABLE jugador
  FOREIGN KEY(idposicion) REFERENCES posicion(id) );
 
 CREATE TABLE jugador_confirmar
- (idUser INTEGER NOT NULL, 
+ (iduser INTEGER NOT NULL, 
  uuid TEXT NOT NULL, 
- FOREIGN KEY(idUser) REFERENCES jugador(id) );
+ FOREIGN KEY(iduser) REFERENCES jugador(id) );
 
 
 CREATE TABLE partido 
