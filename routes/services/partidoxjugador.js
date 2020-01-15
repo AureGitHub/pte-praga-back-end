@@ -37,7 +37,7 @@ const JugadoresEnPartido = async (idpartido) => {
 
     const sql = `select 
     j.id,
-    j.alias,
+    j.alias || ' => ' ||  to_char("created_at", 'DD/MM/YYYY HH24:MI:SS') as alias,
     j.idposicion 
     from partidoxjugador pj
     inner join jugador j on pj.idjugador = j.id    
