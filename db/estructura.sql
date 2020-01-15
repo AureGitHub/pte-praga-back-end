@@ -73,7 +73,7 @@ CREATE TABLE partido
 (id serial PRIMARY KEY,
 idcreador INTEGER, 
 dia timestamp with time zone NOT NULL,
-duracion INTEGER NOT NULL,
+duracion NUMERIC NOT NULL,
 pistas 
 INTEGER NOT NULL, 
 jugadorestotal INTEGER NOT NULL, 
@@ -85,6 +85,7 @@ CREATE TABLE partidoxjugador
 (id SERIAL PRIMARY KEY, 
 idpartido INTEGER NOT NULL, 
 idjugador INTEGER NOT NULL, 
+created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY(idjugador) REFERENCES jugador(id), 
 FOREIGN KEY(idpartido) REFERENCES partido(id) );
 

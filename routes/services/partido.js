@@ -37,9 +37,25 @@ const getAll = async (ctx,next) => {
 
 const getById = async (ctx,next) => {
 
-    const id=ctx.params.id;
-    const partidos = await db.first(['*']).from('partido').where({id});    
-    ctx.state['body'] ={data : partidos, error: false};
+     const id=ctx.params.id;
+    // const partidos = await db.first(['*']).from('partido').where({id});    
+    // ctx.state['body'] ={data : partidos, error: false};
+
+
+    const sql = `select 
+    p.id,
+    p.idcreador,
+    to_char("dia", 'DD/MM/YYYY HH24:MI') as dia,    
+    p.duracion,
+    p.pistas,
+    p.jugadorestotal,
+    p.jugadoresapuntados   
+    from partido p
+    where id=?`;
+
+    const partidos = await db.raw(sql,id);
+    ctx.state['body'] ={data :partidos.rows.length === 0 ? {} : partidos.rows[0], error: false};    
+
 
 }
 
@@ -56,53 +72,8 @@ const addPartido = async (ctx,next) => {
 const updatePartido = async (ctx,next) => {
     try{
         
-        const partido = ctx.request.body;
-
-      
-
+        const partido = ctx.request.body;  
         partido.jugadorestotal = parseInt(partido.pistas) * 4;
-
-        // if(partido.dia.indexOf('Z')<0){
-        //     const hora = partido.dia.split(' ')[1];
-        //     const anno = partido.dia.split(' ')[0].split('/')[2];
-        //     const mes = partido.dia.split(' ')[0].split('/')[1];
-        //     const dia = partido.dia.split(' ')[0].split('/')[0];
-    
-        //     partido.dia =anno + '-' + mes + '-' + dia + ' ' + hora;
-        //    // partido.dia = partido.dia.toString('yyyy-mm-dd HH:mm');
-        // }
-        // else{
-        //     // Date.prototype.addHours = function(h) {
-        //     //     this.setTime(this.getTime() + (h*60*60*1000));
-        //     //     return this;
-        //     //   }               
-            
-            
-            
-        //     partido.dia = new Date(partido.dia.toString());
-        //     partido.dia = partido.dia.toLocaleString();
-
-        //     ctx.throw(509, 'dia :' + partido.dia);
-
-        //     var hora = partido.dia.split(' ')[1].split(':')[0];
-        //     var min = partido.dia.split(' ')[1].split(':')[1];
-        //     var anno = partido.dia.split(' ')[0].split('-')[0];
-        //     var mes = partido.dia.split(' ')[0].split('-')[1];
-        //     var dia = partido.dia.split(' ')[0].split('-')[2];
-
-        //     hora = hora.padStart(2, "0"); 
-        //     min = min.padStart(2, "0"); 
-
-        //     mes = mes.padStart(2, "0"); 
-        //     dia = dia.padStart(2, "0"); 
-
-        //     partido.dia = anno + '-' + mes + '-' + dia + ' ' + hora + ':' + min;
-
-            
-        // }
-
-       
-
         sal = await db('partido').where('id',partido.id).update(partido);       
         ctx.state['body'] ={data : sal, error: false};
 

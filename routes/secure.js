@@ -21,6 +21,17 @@ exports.secure =[
     },
 
     {
+        _matchedRoute : '/partidoxjugadorAddArray',
+        esPublico: false,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']},            
+        ]
+    },
+
+
+    
+
+    {
         _matchedRoute : '/partidos',
         esPublico: true,
         perfiles : [
@@ -46,7 +57,18 @@ exports.secure =[
             {idperfil : 1,  permisos : ['A']},
             {idperfil : 2,  permisos : ['A']}
         ]
+    },   
+
+    {
+        _matchedRoute : '/partidoxjugadorAddByIdPartido/:id',
+        esPublico: true,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
+        ]
     },
+
+
     {
         _matchedRoute : '/partidoxjugadorByIdPartido/:id',
         esPublico: true,
