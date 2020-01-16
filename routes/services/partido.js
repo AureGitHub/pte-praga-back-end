@@ -87,7 +87,28 @@ const updatePartido = async (ctx,next) => {
 
 
 const prueba = async (ctx,next) => {
-    const sal = await db('prueba').insert({id: 1, valor: 'pepe'});
+
+var helper = require('sendgrid').mail;
+var from_email = new helper.Email('test@example.com');
+var to_email = new helper.Email('auredecocccam@gmail.com');
+var subject = 'Hello World from the SendGrid Node.js Library!';
+var content = new helper.Content('text/plain', 'Hello, Email!');
+var mail = new helper.Mail(from_email, subject, to_email, content);
+
+require('dotenv').config();
+
+var sg = require('sendgrid')(process.env.SENDGRID_API_KEY);
+var request = sg.emptyRequest({
+  method: 'POST',
+  path: '/v3/mail/send',
+  body: mail.toJSON(),
+});
+
+sg.API(request, function(error, response) {
+  console.log(response.statusCode);
+  console.log(response.body);
+  console.log(response.headers);
+});
     ctx.state['body'] ={data : sal, error: false}; 
 }
 

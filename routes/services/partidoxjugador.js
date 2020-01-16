@@ -35,10 +35,13 @@ const Jugadores = async () => {
 
 const JugadoresEnPartido = async (idpartido) => {
 
+    //j.alias || ' => ' ||  to_char("created_at", 'DD/MM/YYYY HH24:MI:SS') as alias,
+
     const sql = `select 
     j.id,
-    j.alias || ' => ' ||  to_char("created_at", 'DD/MM/YYYY HH24:MI:SS') as alias,
-    j.idposicion 
+    j.alias,
+    j.idposicion ,
+    pj.idpartidoxjugador_estado
     from partidoxjugador pj
     inner join jugador j on pj.idjugador = j.id    
     where idpartido=?
@@ -85,15 +88,30 @@ const getByIdJugador  = async (ctx,next) => {
 
 }
 
-const add = async (ctx,next) => {   
+const addJugadorInPartido = async (item) => { 
 
 
-    const item = ctx.request.body;  
+    const partido = await db
+    .first('jugadorestotal')
+    .from('partido')
+    .where({id :item.idpartido }); 
 
-    // const jugadoresEnPartido = await db
-    // .first('jugadoresapuntados' ,'jugadorestotal')
-    // .from('partido')
-    // .where({id :item.idpartido }); 
+
+    //jugadores Aceptados
+    const partidoxjugador = await db
+    .count('id')
+    .from('partidoxjugador')
+    .where({idpartido :item.idpartido , idpartidoxjugador_estado : 1 }); 
+
+    const Apuntados = parseInt(partidoxjugador[0].count);
+    
+    if( Apuntados >= partido.jugadorestotal){ 
+        item['idpartidoxjugador_estado'] = 2; // suplente
+    } else {
+        item['idpartidoxjugador_estado'] = 1; // Aceptado
+    }
+
+
 
     const sal = await db.transaction(async function (trx) {
         try {
@@ -105,8 +123,18 @@ const add = async (ctx,next) => {
             await  ctx.throw(401, err.message);
         }
     });
+}
 
-    ctx.state['body'] ={data : sal, error: false};
+const add = async (ctx,next) => {   
+
+
+    const item = ctx.request.body;  
+
+    await addJugadorInPartido(item);
+
+   
+
+    ctx.state['body'] ={data : true, error: false};
 }
 
 const addArray = async (ctx,next) => {  
@@ -116,27 +144,12 @@ const addArray = async (ctx,next) => {
      const idpartido = item.idpartido;
      const JugadoresAdd =item.JugadoresAdd;
 
-    const sal = await db.transaction(async function (trx) {
-        try {
+     for (let index = 0; index < JugadoresAdd.length; index++) {
+        const idjugador = JugadoresAdd[index].id;
+        await addJugadorInPartido({idpartido,idjugador});
+      }   
 
-
-            for (let index = 0; index < JugadoresAdd.length; index++) {
-                const idjugador = JugadoresAdd[index].id;
-                await trx('partidoxjugador').insert({idpartido,idjugador});
-              }
-            // JugadoresAdd.forEach(e => {
-            //     const idjugador = e.id;
-            //     var sal1 = await trx('partidoxjugador').insert({idpartido,idjugador});
-            // });            
-             const sal2 = await trx('partido').where({id: item.idpartido}).increment('jugadoresapuntados',JugadoresAdd.length);
-
-
-        } catch (err) {
-            await  ctx.throw(401, err.message);
-        }
-    });
-
-    ctx.state['body'] ={data : sal, error: false};
+    ctx.state['body'] ={data : true, error: false};
 
 
 
@@ -149,12 +162,36 @@ const remove = async (ctx,next) => {
     const idjugador = item.idjugador;
     const idpartido = item.idpartido;
     
+
+    const partidoxjugadoABorrar = await db
+    .first('*')
+    .from('partidoxjugador')
+    .where({idpartido , idjugador }); 
+
     
     
     const sal = await db.transaction(async function (trx) {
         try {
             const sal1 = await trx('partidoxjugador').where({idjugador, idpartido}).del(); 
             const sal2 = await trx('partido').where({id: item.idpartido}).increment('jugadoresapuntados',-1);
+
+            if(partidoxjugadoABorrar.idpartidoxjugador_estado === 1){
+                //se ha borrado uno aceptado, hay que "subir" a un suplente
+
+                const jugadorAsciende =  await db
+                .first('idjugador')
+                .from('partidoxjugador')
+                .where({idpartido, idpartidoxjugador_estado : 2 })
+                .orderBy('created_at'); 
+
+                if(jugadorAsciende){
+                    await db('partidoxjugador').where({idjugador:jugadorAsciende.idjugador, idpartido })
+                    .update('idpartidoxjugador_estado',1);
+                }
+                
+
+            }
+
 
 
         } catch (err) {

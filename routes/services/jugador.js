@@ -2,7 +2,7 @@ const db = require('../../db');
 const bodyParser = require('koa-bodyparser');
 const bcrypt = require('./../../utilities/bcrypt');
 const myConstants= require('./../../utilities/myConstants');
-const transporter = require('./../../utilities/email');
+const SendEmail = require('./../../utilities/email');
 const uuidv4 = require('uuid/v4');
 
 const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactory;
@@ -101,23 +101,23 @@ const cambiarPasswordForget = async (ctx,next) => {
     
     
 
-    const confirm_jugador = await db.first(['idUser'])  
+    const confirm_jugador = await db.first(['iduser'])  
     .from('jugador_confirmar')      
     .where({ uuid :form.uuid });
 
     if(!confirm_jugador){
-        ctx.throw(401, 'No ha pedido el código de confirmación');
+        ctx.throw(401, 'No ha pedido el código de confirmación o código incorrecto');
     }
 
     const passwordhash = await  bcrypt.hash(form.password);
 
-    const idUser = confirm_jugador.idUser;
+    const iduser = confirm_jugador.iduser;
 
-    db.transaction(async function (trx) {
+    const sal = await db.transaction(async function (trx) {
 
         try {
-            const sal1 = await trx('jugador_confirmar').where('iduser',idUser).del();            
-            const sal3 = await trx('jugador').where('id',idUser).update({passwordhash});  
+            const sal1 = await trx('jugador_confirmar').where({iduser}).del();            
+            const sal2 = await trx('jugador').where({id: iduser}).update({passwordhash});  
 
 
         } catch (err) {
@@ -151,25 +151,27 @@ const cambiarPassword = async (ctx,next) => {
 }
 
 
-const SaveCodigoConfirmacion = async (ctx,idUser, email) => {
+const SaveCodigoConfirmacion = async (ctx,iduser, email) => {
 
     const uuid = uuidv4();
 
-    // let info = await transporter.sendMail({
-    //     from: '"sunday praga sunday 👻" <sunday.praga@padel.com>', // sender address
-    //     to: email, // list of receivers
-    //     subject: "Solicitud de confirmación de correo sunday praga ✔", // Subject line
-    //     text: 'Hola, este es el código para confirmar tu email: ' + uuid, // plain text body
-    //     html: 'Hola, este es el código para confirmar tu email: <b>' + uuid + '</b>' // html body
-    //   }
-    
-    // );
-       
+    const sal = await db.transaction(async function (trx) {
+        try {
 
-    const sal = await db('jugador_confirmar').where('idUser',idUser).del();   
-    const user_uuid = await db('jugador_confirmar').insert({idUser, uuid});
+            await db('jugador_confirmar').where({iduser}).del();   
+            await db('jugador_confirmar').insert({iduser, uuid});
 
-    ctx.state['body'] ={data : sal, error: false};    
+            SendEmail(email,"Solicitud de confirmación de correo sunday praga ✔",
+            'text/plain','Hola, este es tu código de confirmación: ' + uuid );
+
+        } catch (err) {
+            await  ctx.throw(401, err.message);
+        }
+    });
+
+
+
+    ctx.state['body'] ={data : true, error: false};    
 
 }
 
@@ -211,11 +213,11 @@ const confirmarEmail = async (ctx,next) => {
 
     const form = ctx.request.body;    
     
-    const idUser =  ctx.state['idUser'];
+    const iduser =  ctx.state['idUser'];
 
     const user = await db.first(['uuid'])  
     .from('jugador_confirmar')      
-    .where({ idUser });
+    .where({ iduser });
 
     if(!user){
         ctx.throw(401, 'No ha pedido el código de confirmación');
@@ -233,7 +235,7 @@ const confirmarEmail = async (ctx,next) => {
             try {
 
 
-                const sal1 = await trx('jugador_confirmar').where('idUser',idUser).del();
+                const sal1 = await trx('jugador_confirmar').where({iduser}).del();
                 const sal2  = await trx('jugador').where('id',idUser).update({idestado}); 
 
     
@@ -247,7 +249,7 @@ const confirmarEmail = async (ctx,next) => {
         ctx.state['body'] ={data : true, error: false}; 
 
     } else{
-        ctx.state['body'] ={data : false, error: false};    
+        ctx.throw(401, 'Código de confirmación incorrecto');
     }
 
   
