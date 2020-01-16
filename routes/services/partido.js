@@ -71,10 +71,76 @@ const addPartido = async (ctx,next) => {
 
 const updatePartido = async (ctx,next) => {
     try{
+
+        /*         
+        tengo que detectar si cambia el número de pistas..
+        Si aumenta => si hay suplentes, añadir los que se puedan
+        Si disminuye => Pasar a suplente los apuntados que no entren
+
+        Para hacer esto voy a tener que utilizar funciones de Jugador.
+        Tendré que sacarlo a alguna capa intermedia
+        */
         
         const partido = ctx.request.body;  
+
+        const old_partido = await db('partido').first('pistas').where('id',partido.id);
+        
         partido.jugadorestotal = parseInt(partido.pistas) * 4;
-        sal = await db('partido').where('id',partido.id).update(partido);       
+
+        const sal = await db.transaction(async function (trx) {
+            try {  
+
+                if(parseInt(old_partido.pistas) < parseInt(partido.pistas)){
+                    //pasar suplentes a Aceptados
+                    const cuantosSuplentesAscientes = (parseInt(partido.pistas) - parseInt(old_partido.pistas)) * 4;
+
+                    //order ascendente. FIFO
+                    const sql = `select 
+                    pj.id                        
+                    from partidoxjugador pj                    
+                    where idpartido=? and idpartidoxjugador_estado=2
+                    order by pj.created_at`;
+                    const suplentes = await db.raw(sql,partido.id); 
+
+                    const LosQuePuedoPasar = (cuantosSuplentesAscientes > suplentes.rows.length) ?  suplentes.rows.length : cuantosSuplentesAscientes;
+
+                    for (let index = 0; index < LosQuePuedoPasar; index++){
+                        if(suplentes.rows[index]){
+                            await db('partidoxjugador').where({id : suplentes.rows[index].id })
+                            .update('idpartidoxjugador_estado',1); 
+                        } 
+                    }
+                } else  if(parseInt(old_partido.pistas) > parseInt(partido.pistas)){
+                    //pasar Aceptados a suplentes                    
+                    //order descendente. LIFO
+                    
+                    const sql = `select 
+                    pj.id                        
+                    from partidoxjugador pj                    
+                    where idpartido=? and idpartidoxjugador_estado=1
+                    order by pj.created_at desc`;
+                    const aceptados = await db.raw(sql,partido.id); 
+
+                    // los que hay apuntados menos los huecos que tengo
+                    const cuantosAceptadosDescienden = aceptados.rows.length - (parseInt(partido.pistas) * 4);
+
+
+                    for (let index = 0; index < cuantosAceptadosDescienden; index++){
+                        if(aceptados.rows[index]){
+                            await db('partidoxjugador').where({id : aceptados.rows[index].id })
+                            .update('idpartidoxjugador_estado',2); 
+                        }
+                    }
+                }
+                await db('partido').where('id',partido.id).update(partido); 
+
+            } catch (err) {
+                await  ctx.throw(401, err.message);
+            }
+        });
+
+        
+              
         ctx.state['body'] ={data : sal, error: false};
 
     }
