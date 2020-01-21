@@ -80,15 +80,48 @@ const updatePartido = async (ctx,next) => {
         Para hacer esto voy a tener que utilizar funciones de Jugador.
         Tendré que sacarlo a alguna capa intermedia
         */
+
+        /*
+            Crear las pistas de los partidos:
+                Si solo hay una pista => se crea una sola pista
+                Si hay varias pistas
+                    3 partidos * pista (de 35 min cada uno)
+        */
         
         const partido = ctx.request.body;  
 
-        const old_partido = await db('partido').first('pistas').where('id',partido.id);
+        const idpartido = partido.id;
+
+        const old_partido = await db('partido').first('pistas').where({id: idpartido});
         
-        partido.jugadorestotal = parseInt(partido.pistas) * 4;
+        partido.jugadorestotal = parseInt(partido.pistas) * 4;        
+
+        let subpartido = 'partido';
+
+        let nombre = subpartido + '1';
 
         const sal = await db.transaction(async function (trx) {
-            try {  
+            try {   
+                await trx('partidoxpista').where({idpartido}).del(); 
+                
+                if(partido.pistas === 1){
+                    // solo 1 partidoxpista
+                   
+                    await trx('partidoxpista').insert({idpartido,nombre});
+
+                } else{
+                    for (let index = 0; index < partido.pistas; index++) {
+                        //por cada pista, 3 partidos
+                        nombre = subpartido + (index + 1)  +  '_1';
+                         await trx('partidoxpista').insert({idpartido,nombre});
+     
+                         nombre = subpartido + (index + 1)  +  '_2';
+                         await trx('partidoxpista').insert({idpartido,nombre});
+     
+                         nombre = subpartido + (index + 1)  +  '_3';
+                         await trx('partidoxpista').insert({idpartido,nombre});
+                     }
+                }                
 
                 if(parseInt(old_partido.pistas) < parseInt(partido.pistas)){
                     //pasar suplentes a Aceptados

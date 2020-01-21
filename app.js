@@ -33,7 +33,9 @@ app.use(async (ctx, next) => {
 
 app.use(errorHandler);
 
-app.use(router);
+app.use(router); 
 
-app.listen(process.env.PORT || 4000);
-console.log('connected');
+const port = process.env.PORT || 4000
+
+app.listen(port);
+console.log('connected ' + port);

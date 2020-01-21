@@ -11,6 +11,8 @@
             "skipFiles": [
                 "<node_internals>/**"
             ],
+            //"runtimeExecutable": "nodemon",
+            //"restart": true,
             "program": "${workspaceFolder}\\app.js"
         }
     ]

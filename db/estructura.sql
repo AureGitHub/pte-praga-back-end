@@ -2,6 +2,12 @@
 do $$
 BEGIN
 
+
+
+if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxpista') THEN
+		drop TABLE partidoxpista;
+end if;
+
 if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'jugador_confirmar') THEN
 		drop TABLE jugador_confirmar;
 end if;
@@ -74,11 +80,27 @@ CREATE TABLE partido
 idcreador INTEGER, 
 dia timestamp with time zone NOT NULL,
 duracion NUMERIC NOT NULL,
-pistas 
-INTEGER NOT NULL, 
+pistas INTEGER NOT NULL, 
 jugadorestotal INTEGER NOT NULL, 
 jugadoresapuntados INTEGER NOT NULL, 
 FOREIGN KEY(idcreador) REFERENCES jugador(id) );
+
+
+CREATE TABLE partidoxpista(
+	id serial PRIMARY KEY,
+	idpartido INTEGER NOT NULL,
+	nombre TEXT NOT NULL,
+	iddrive1 INTEGER NULL,
+	iddrive2 INTEGER NULL,
+	idreves1 INTEGER NULL,
+	idreves2 INTEGER NULL,
+	FOREIGN KEY (idpartido) REFERENCES partido(id),
+	FOREIGN KEY (iddrive1)  REFERENCES jugador(id),
+	FOREIGN KEY (iddrive2)  REFERENCES jugador(id),
+	FOREIGN KEY (idreves1)  REFERENCES jugador(id),
+	FOREIGN KEY (idreves2)  REFERENCES jugador(id)
+);
+
 
 
 CREATE TABLE partidoxjugador 
@@ -86,7 +108,7 @@ CREATE TABLE partidoxjugador
 idpartido INTEGER NOT NULL, 
 idjugador INTEGER NOT NULL, 
 created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-FOREIGN KEY(idjugador) REFERENCES jugador(id), 
+FOREIGN KEY (idjugador) REFERENCES jugador(id), 
 FOREIGN KEY(idpartido) REFERENCES partido(id) );
 
 
