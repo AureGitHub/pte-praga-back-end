@@ -86,9 +86,12 @@ jugadoresapuntados INTEGER NOT NULL,
 FOREIGN KEY(idcreador) REFERENCES jugador(id) );
 
 
+
 CREATE TABLE partidoxpista(
 	id serial PRIMARY KEY,
 	idpartido INTEGER NOT NULL,
+	idpista INTEGER NOT NULL,
+	idturno INTEGER NOT NULL,
 	nombre TEXT NOT NULL,
 	iddrive1 INTEGER NULL,
 	iddrive2 INTEGER NULL,

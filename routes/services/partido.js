@@ -8,6 +8,31 @@ const addSubtractDate = require("add-subtract-date");
 const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactory;
 
 
+const getpartidoxpistaByIdpartido = async (ctx,next) => {
+
+    
+    const idpartido= parseInt(ctx.params.id);
+
+    const sql = `select 
+    pxp.nombre,
+    coalesce(jd1.alias,'jd1') jd1,
+    coalesce(jr1.alias,'jr1') jr1,
+    coalesce(jd2.alias,'jd2') jd2,
+    coalesce(jr2.alias,'jr2') jr2
+    from partidoxpista pxp
+    left join jugador jd1 on pxp.iddrive1= jd1.id
+    left join jugador jd2 on pxp.iddrive1= jd2.id
+    left join jugador jr1 on pxp.iddrive1= jr1.id
+    left join jugador jr2 on pxp.iddrive1= jr2.id
+    where idpartido=?
+    order by idturno,idpista`;
+
+    const partidoxpista = await db.raw(sql,idpartido);
+    ctx.state['body'] ={data : partidoxpista.rows, error: false};   
+
+}
+
+
 const getAll = async (ctx,next) => {
 
 
@@ -96,9 +121,11 @@ const updatePartido = async (ctx,next) => {
         
         partido.jugadorestotal = parseInt(partido.pistas) * 4;        
 
-        let subpartido = 'partido';
+        let subpartido = 'pista';
 
         let nombre = subpartido + '1';
+        let idpista = 1;
+        let idturno = 1;
 
         const sal = await db.transaction(async function (trx) {
             try {   
@@ -107,19 +134,28 @@ const updatePartido = async (ctx,next) => {
                 if(partido.pistas === 1){
                     // solo 1 partidoxpista
                    
-                    await trx('partidoxpista').insert({idpartido,nombre});
+                    await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
 
                 } else{
                     for (let index = 0; index < partido.pistas; index++) {
                         //por cada pista, 3 partidos
-                        nombre = subpartido + (index + 1)  +  '_1';
-                         await trx('partidoxpista').insert({idpartido,nombre});
+
+                        idpista = index + 1;
+
+                        idturno = 1;
+
+                        nombre = subpartido + (index + 1)  +  '_' + idturno;
+                        await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+
+                        idturno++;
      
-                         nombre = subpartido + (index + 1)  +  '_2';
-                         await trx('partidoxpista').insert({idpartido,nombre});
+                        nombre = subpartido + (index + 1)  +  '_' + idturno;
+                        await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+
+                        idturno++;
      
-                         nombre = subpartido + (index + 1)  +  '_3';
-                         await trx('partidoxpista').insert({idpartido,nombre});
+                        nombre = subpartido + (index + 1)  +  '_' + idturno;
+                        await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
                      }
                 }                
 
@@ -214,6 +250,7 @@ sg.API(request, function(error, response) {
 
 exports.register = function(router){    
     router.get('/prueba', prueba);
+    router.get('/partidosxpista/:id', awaitErorrHandlerFactory(getpartidoxpistaByIdpartido));
     router.get('/partidos', awaitErorrHandlerFactory(getAll));
     router.get('/partidos/:id', awaitErorrHandlerFactory(getById));
     router.post('/partidos', bodyParser(), awaitErorrHandlerFactory(addPartido)); 

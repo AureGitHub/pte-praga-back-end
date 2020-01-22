@@ -28,7 +28,16 @@ exports.secure =[
         ]
     },
 
+    {
+        _matchedRoute : '/partidosxpista/:id',
+        esPublico: true,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
+        ]
+    },
 
+    
     
 
     {
