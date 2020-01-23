@@ -1,6 +1,13 @@
 exports.secure =[
    
-
+    {
+        _matchedRoute : '/hacerparejas/:id',
+        esPublico: false,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']}            
+        ]
+    },
+    
 
     {
         _matchedRoute : '/jugadores',

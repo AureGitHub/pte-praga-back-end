@@ -1,32 +1,29 @@
 const db = require('../../db');
 const bodyParser = require('koa-bodyparser');
-const myConstants= require('./../../utilities/myConstants');
-const transporter = require('./../../utilities/email');
-const addSubtractDate = require("add-subtract-date");
-
-
 const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactory;
 
 
-const getpartidoxpistaByIdpartido = async (ctx,next) => {
-
-    
+const getpartidoxpistaByIdpartido = async (ctx,next) => {    
     const idpartido= parseInt(ctx.params.id);
-
     const sql = `select 
-    pxp.nombre,
+    pxpi.nombre,
     coalesce(jd1.alias,'jd1') jd1,
     coalesce(jr1.alias,'jr1') jr1,
     coalesce(jd2.alias,'jd2') jd2,
     coalesce(jr2.alias,'jr2') jr2
-    from partidoxpista pxp
-    left join jugador jd1 on pxp.iddrive1= jd1.id
-    left join jugador jd2 on pxp.iddrive1= jd2.id
-    left join jugador jr1 on pxp.iddrive1= jr1.id
-    left join jugador jr2 on pxp.iddrive1= jr2.id
-    where idpartido=?
+    from partidoxpista pxpi
+	left join  partidoxpareja pxpa1 on pxpi.idpartidoxpareja1 = pxpa1.id
+	left join  partidoxpareja pxpa2 on pxpi.idpartidoxpareja2 = pxpa2.id
+	
+    left join jugador jd1 on pxpa1.iddrive= jd1.id
+	left join jugador jr1 on pxpa1.idreves= jr1.id
+	
+	left join jugador jd2 on pxpa2.iddrive= jd2.id
+	left join jugador jr2 on pxpa2.idreves= jr2.id
+	
+    
+    where pxpi.idpartido=?
     order by idturno,idpista`;
-
     const partidoxpista = await db.raw(sql,idpartido);
     ctx.state['body'] ={data : partidoxpista.rows, error: false};   
 
@@ -129,35 +126,36 @@ const updatePartido = async (ctx,next) => {
 
         const sal = await db.transaction(async function (trx) {
             try {   
-                await trx('partidoxpista').where({idpartido}).del(); 
+                await trx('partidoxpista').where({idpartido}).del();                 
+                await trx('partidoxpareja').where({idpartido}).del(); 
                 
-                if(partido.pistas === 1){
-                    // solo 1 partidoxpista
+                // if(partido.pistas === 1){
+                //     // solo 1 partidoxpista
                    
-                    await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+                //     await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
 
-                } else{
-                    for (let index = 0; index < partido.pistas; index++) {
-                        //por cada pista, 3 partidos
+                // } else{
+                //     for (let index = 0; index < partido.pistas; index++) {
+                //         //por cada pista, 3 partidos
 
-                        idpista = index + 1;
+                //         idpista = index + 1;
 
-                        idturno = 1;
+                //         idturno = 1;
 
-                        nombre = subpartido + (index + 1)  +  '_' + idturno;
-                        await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+                //         nombre = subpartido + (index + 1)  +  '_' + idturno;
+                //         await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
 
-                        idturno++;
+                //         idturno++;
      
-                        nombre = subpartido + (index + 1)  +  '_' + idturno;
-                        await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+                //         nombre = subpartido + (index + 1)  +  '_' + idturno;
+                //         await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
 
-                        idturno++;
+                //         idturno++;
      
-                        nombre = subpartido + (index + 1)  +  '_' + idturno;
-                        await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-                     }
-                }                
+                //         nombre = subpartido + (index + 1)  +  '_' + idturno;
+                //         await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+                //      }
+                // }                
 
                 if(parseInt(old_partido.pistas) < parseInt(partido.pistas)){
                     //pasar suplentes a Aceptados
