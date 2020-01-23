@@ -98,7 +98,7 @@ const hacerparejasByIdpartido = async (ctx,next) => {
 
 
     let idpista = null;
-    let idturno = null;
+    
 
     let subpartido = 'pista';
 
@@ -115,8 +115,10 @@ const hacerparejasByIdpartido = async (ctx,next) => {
             
             //hago las parejas
             // borro antes de procesar
+           
             await trx('partidoxpista').where({idpartido}).del(); 
             await trx('partidoxpareja').where({idpartido}).del(); 
+           
 
             for (let index = 0; index < lstparejas.length; index++) {                
                 let idpareja = await trx('partidoxpareja').insert(lstparejas[index]).returning('id');
@@ -131,7 +133,7 @@ const hacerparejasByIdpartido = async (ctx,next) => {
         if(pistas === 1){
             //solo habrá 1
             idpista = 1;
-            idturno = 1;
+            let idturno = 1;
             idpartidoxpareja1 = lstparejas[0] ? lstparejas[0].idpareja : null;
             idpartidoxpareja2 = lstparejas[1] ? lstparejas[1].idpareja : null;
 
@@ -140,30 +142,38 @@ const hacerparejasByIdpartido = async (ctx,next) => {
             
         } else {
 
-            let parejas_i = [];
-            
-            let total = 6; //lstparejas.length;
+            let parejas_i = [];           
+          
+            lstparejas.forEach( pair =>{
+                parejas_i.push(pair.idpareja);
+            });
 
-            for (var i = 1; i <= total; i++) {                
-                parejas_i.push(i);
 
-            };
-
-            let pos = 0;
             let pairs=[];
 
             for (var i = 0; i < parejas_i.length; i++) {
 
-                for (var j = i; j < parejas_i.length; j++) {        
+                for (var j = 0; j < parejas_i.length; j++) {        
                     if(parejas_i[i] != parejas_i[j]){
-                        if(pairs.length < (6 / 2)*3){
-                            pairs.push({x: parejas_i[i], y: parejas_i[j]});        
+
+                        let x = null;
+                        let y = null;
+                        if(parejas_i[i] < parejas_i[j]){
+                            x = parejas_i[i];
+                            y = parejas_i[j];
                         }
-                        
-                    }
-                    
-                }
-        
+                        else {
+                            x = parejas_i[j];
+                            y = parejas_i[i];
+
+                        }
+                        let par = {x,y};
+
+                        if(!pairs.find( a => a.x === x && a.y === y)){
+                            pairs.push({x,y});  
+                        }                        
+                    }                    
+                }        
             }
 
 /*
@@ -171,26 +181,34 @@ const hacerparejasByIdpartido = async (ctx,next) => {
             1  Num Pareja -1  (se borran)
 */
 
-            for (let index = 0; index < pistas; index++) {
-                //por cada pista, 3 partidos
 
-                idpista = index + 1;
+            for (idturno = 1 ; idturno <= 3 ;  idturno++ ){
+                // 3 partidos por pista
+                let parajeInTurno = [];
+                for(idpista = 1; idpista <= pistas ;idpista++ ){
+                    idpartidoxpareja1 = null;
+                    idpartidoxpareja2 = null;
+                    if(pairs.length >0){
+                        let parejasDiponibles = pairs.filter(a=>!parajeInTurno.find(b=> b === a.x) && !parajeInTurno.find(b=> b === a.y));
+                        if(parejasDiponibles && parejasDiponibles.length > 0){
+                            // elijo al azar una de las diponibles
+                            let pairToAdd = parejasDiponibles[getRndInteger(0,parejasDiponibles.length -1)];
+                            parajeInTurno.push(pairToAdd.x);
+                            parajeInTurno.push(pairToAdd.y);
+                            //la borro de las parejas totales
+                            pairs = pairs.filter( a=> a!=pairToAdd);
 
-                idturno = 1;
+                            idpartidoxpareja1 = pairToAdd.x;                                    
+                            idpartidoxpareja2 = pairToAdd.y;
+                        }                       
+                       
+                    }
 
-                nombre = subpartido + (index + 1)  +  '_' + idturno;
-                await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
+                    nombre = subpartido + idpista  +  '_' + idturno;
+                    await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre,idpartidoxpareja1,idpartidoxpareja2});
 
-                idturno++;
-
-                nombre = subpartido + (index + 1)  +  '_' + idturno;
-                await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-
-                idturno++;
-
-                nombre = subpartido + (index + 1)  +  '_' + idturno;
-                await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-             }
+                }
+            }           
         }
         
 
