@@ -112,6 +112,16 @@ CREATE TABLE partidoxpista(
 	
 );
 
+CREATE TABLE partidoxpistaxmarcador(
+	id serial PRIMARY KEY,
+	idpartidoxpista INTEGER NOT NULL,
+	idset INTEGER NOT NULL,
+	juegospareja1 INTEGER NOT NULL,
+	juegospareja2 INTEGER NOT NULL,	
+	FOREIGN KEY (idpartidoxpista) REFERENCES partidoxpista(id)
+	
+	
+);
 
 
 CREATE TABLE partidoxjugador 

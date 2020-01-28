@@ -6,11 +6,14 @@ const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactor
 const getpartidoxpistaByIdpartido = async (ctx,next) => {    
     const idpartido= parseInt(ctx.params.id);
     const sql = `select 
+    pxpi.id,
     pxpi.nombre,
     coalesce(jd1.alias,'jd1') jd1,
     coalesce(jr1.alias,'jr1') jr1,
     coalesce(jd2.alias,'jd2') jd2,
-    coalesce(jr2.alias,'jr2') jr2
+    coalesce(jr2.alias,'jr2') jr2,
+    pxpi.idpista,
+    pxpi.idturno
     from partidoxpista pxpi
 	left join  partidoxpareja pxpa1 on pxpi.idpartidoxpareja1 = pxpa1.id
 	left join  partidoxpareja pxpa2 on pxpi.idpartidoxpareja2 = pxpa2.id
@@ -80,6 +83,14 @@ const getById = async (ctx,next) => {
 
 
 }
+
+const addpartidosxpistaxmarcador= async (ctx,next) => {
+
+    const NewPpartidosxpistaxmarcadorartido = ctx.request.body;
+    NewPpartidosxpistaxmarcadorartido['id'] = await db('partidoxpistaxmarcador').insert(NewPpartidosxpistaxmarcadorartido);
+    ctx.state['body'] ={data : NewPpartidosxpistaxmarcadorartido, error: false};
+}
+
 
 const addPartido = async (ctx,next) => {
     const NewPartido = ctx.request.body;
@@ -253,6 +264,9 @@ exports.register = function(router){
     router.get('/partidos/:id', awaitErorrHandlerFactory(getById));
     router.post('/partidos', bodyParser(), awaitErorrHandlerFactory(addPartido)); 
     router.put('/partidos', bodyParser(),  awaitErorrHandlerFactory(updatePartido)); 
+
+    router.post('/partidosxpistaxmarcador', bodyParser(), awaitErorrHandlerFactory(addpartidosxpistaxmarcador)); 
+
 
    
     

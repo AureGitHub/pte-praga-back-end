@@ -44,6 +44,15 @@ exports.secure =[
         ]
     },
 
+    {
+        _matchedRoute : '/partidosxpistaxmarcador',
+        esPublico: true,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']},
+            {idperfil : 2,  permisos : ['A']}
+        ]
+    },
+
     
     
 
