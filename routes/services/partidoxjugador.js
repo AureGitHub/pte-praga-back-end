@@ -172,8 +172,12 @@ const remove = async (ctx,next) => {
     
     const sal = await db.transaction(async function (trx) {
         try {
-            const sal1 = await trx('partidoxjugador').where({idjugador, idpartido}).del(); 
-            const sal2 = await trx('partido').where({id: item.idpartido}).increment('jugadoresapuntados',-1);
+            
+            await trx('partidoxpistaxmarcador').where({idpartido}).del();                 
+            await trx('partidoxpista').where({idpartido}).del();                 
+            await trx('partidoxpareja').where({idpartido}).del(); 
+            await trx('partidoxjugador').where({idjugador, idpartido}).del(); 
+            await trx('partido').where({id: item.idpartido}).increment('jugadoresapuntados',-1);
 
             if(partidoxjugadoABorrar.idpartidoxjugador_estado === 1){
                 //se ha borrado uno aceptado, hay que "subir" a un suplente

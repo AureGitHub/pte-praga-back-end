@@ -4,6 +4,11 @@ BEGIN
 
 
 
+if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxpistaxmarcador') THEN
+		drop TABLE partidoxpistaxmarcador;
+end if;
+
+
 if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxpista') THEN
 		drop TABLE partidoxpista;
 end if;
@@ -18,6 +23,13 @@ end if;
 
 if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'jugador_confirmar') THEN
 		drop TABLE jugador_confirmar;
+end if;
+
+
+
+
+if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxpareja') THEN
+		drop TABLE partidoxpareja;
 end if;
 
 if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partido') THEN
@@ -85,6 +97,17 @@ jugadorestotal INTEGER NOT NULL,
 jugadoresapuntados INTEGER NOT NULL, 
 FOREIGN KEY(idcreador) REFERENCES jugador(id) );
 
+CREATE TABLE partidoxjugador 
+(id SERIAL PRIMARY KEY, 
+idpartido INTEGER NOT NULL, 
+idjugador INTEGER NOT NULL, 
+idpartidoxjugador_estado INTEGER NOT NULL,
+created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY(idpartido) REFERENCES partido(id),
+FOREIGN KEY (idjugador) REFERENCES jugador(id), 
+FOREIGN KEY (idpartidoxjugador_estado) REFERENCES partidoxjugador_estado(id)
+ );
+
 
 CREATE TABLE partidoxpareja
 (
@@ -93,7 +116,8 @@ CREATE TABLE partidoxpareja
 	 numero integer NOT NULL,
 	 iddrive integer,
      idreves integer,
-	 FOREIGN KEY (iddrive) REFERENCES partido(id),
+	 FOREIGN KEY (idpartido) REFERENCES partido(id),
+	 FOREIGN KEY (iddrive) REFERENCES jugador(id),
 	 FOREIGN KEY (idreves)  REFERENCES jugador(id)
 );
 
@@ -107,6 +131,7 @@ CREATE TABLE partidoxpista(
 	nombre TEXT NOT NULL,
 	idpartidoxpareja1 integer,
     idpartidoxpareja2 integer,
+	FOREIGN KEY (idpartido) REFERENCES partido(id),
 	FOREIGN KEY (idpartidoxpareja1) REFERENCES partidoxpareja(id),
 	FOREIGN KEY (idpartidoxpareja2)  REFERENCES partidoxpareja(id)
 	
@@ -114,23 +139,15 @@ CREATE TABLE partidoxpista(
 
 CREATE TABLE partidoxpistaxmarcador(
 	id serial PRIMARY KEY,
+	idpartido INTEGER NOT NULL,
 	idpartidoxpista INTEGER NOT NULL,
 	idset INTEGER NOT NULL,
-	juegospareja1 INTEGER NOT NULL,
-	juegospareja2 INTEGER NOT NULL,	
-	FOREIGN KEY (idpartidoxpista) REFERENCES partidoxpista(id)
-	
-	
+	juegospareja1 integer,
+    juegospareja2 integer,
+	FOREIGN KEY (idpartido) REFERENCES partido(id),
+	FOREIGN KEY (idpartidoxpista) REFERENCES partidoxpista(id)	
 );
 
-
-CREATE TABLE partidoxjugador 
-(id SERIAL PRIMARY KEY, 
-idpartido INTEGER NOT NULL, 
-idjugador INTEGER NOT NULL, 
-created_at timestamp without time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-FOREIGN KEY (idjugador) REFERENCES jugador(id), 
-FOREIGN KEY(idpartido) REFERENCES partido(id) );
 
 
 END; $$

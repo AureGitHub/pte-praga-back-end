@@ -27,8 +27,30 @@ const getpartidoxpistaByIdpartido = async (ctx,next) => {
     
     where pxpi.idpartido=?
     order by idturno,idpista`;
-    const partidoxpista = await db.raw(sql,idpartido);
-    ctx.state['body'] ={data : partidoxpista.rows, error: false};   
+    const getBD = await db.raw(sql,idpartido);
+
+    let partidoxpista = getBD.rows;
+
+    //todos los marcadores de todos los partidos del partido
+    marcadores = await db
+    .select('id','idpartidoxpista','idset','juegospareja1','juegospareja2')
+    .from('partidoxpistaxmarcador').where({idpartido}).orderBy('idpartidoxpista', 'idset');
+    
+   
+
+    partidoxpista.forEach(element => {
+        let susMarcadores = marcadores.filter(a=> a.idpartidoxpista === element.id);
+
+        susMarcadores.forEach(marcador => {            
+            element[`set${marcador.idset}`] = marcador;
+        });
+
+
+        // element['marcador'] = marcadores.filter(a=> a.idpartidoxpista === element.id);
+    });
+
+
+    ctx.state['body'] ={data : partidoxpista, error: false};   
 
 }
 
@@ -86,9 +108,22 @@ const getById = async (ctx,next) => {
 
 const addpartidosxpistaxmarcador= async (ctx,next) => {
 
-    const NewPpartidosxpistaxmarcadorartido = ctx.request.body;
-    NewPpartidosxpistaxmarcadorartido['id'] = await db('partidoxpistaxmarcador').insert(NewPpartidosxpistaxmarcadorartido);
-    ctx.state['body'] ={data : NewPpartidosxpistaxmarcadorartido, error: false};
+    const item = ctx.request.body;
+
+    if(item.id){
+        //update
+        await db('partidoxpistaxmarcador').where('id',item.id).update({juegospareja1:item.juegospareja1,juegospareja2:item.juegospareja2 }); 
+    } else{        
+        delete item.id;
+         const getBD= await db('partidoxpistaxmarcador').insert(item).returning('id');    
+         item['id'] = getBD[0];
+        
+    }
+
+    ctx.state['body'] ={data : item, error: false};
+
+
+    
 }
 
 
@@ -137,6 +172,7 @@ const updatePartido = async (ctx,next) => {
 
         const sal = await db.transaction(async function (trx) {
             try {   
+                await trx('partidoxpistaxmarcador').where({idpartido}).del();                 
                 await trx('partidoxpista').where({idpartido}).del();                 
                 await trx('partidoxpareja').where({idpartido}).del(); 
                 
