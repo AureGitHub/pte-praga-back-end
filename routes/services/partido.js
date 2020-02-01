@@ -174,35 +174,7 @@ const updatePartido = async (ctx,next) => {
             try {   
                 await trx('partidoxpistaxmarcador').where({idpartido}).del();                 
                 await trx('partidoxpista').where({idpartido}).del();                 
-                await trx('partidoxpareja').where({idpartido}).del(); 
-                
-                // if(partido.pistas === 1){
-                //     // solo 1 partidoxpista
-                   
-                //     await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-
-                // } else{
-                //     for (let index = 0; index < partido.pistas; index++) {
-                //         //por cada pista, 3 partidos
-
-                //         idpista = index + 1;
-
-                //         idturno = 1;
-
-                //         nombre = subpartido + (index + 1)  +  '_' + idturno;
-                //         await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-
-                //         idturno++;
-     
-                //         nombre = subpartido + (index + 1)  +  '_' + idturno;
-                //         await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-
-                //         idturno++;
-     
-                //         nombre = subpartido + (index + 1)  +  '_' + idturno;
-                //         await trx('partidoxpista').insert({idpartido,idpista,idturno,nombre});
-                //      }
-                // }                
+                await trx('partidoxpareja').where({idpartido}).del();   
 
                 if(parseInt(old_partido.pistas) < parseInt(partido.pistas)){
                     //pasar suplentes a Aceptados
@@ -265,6 +237,28 @@ const updatePartido = async (ctx,next) => {
 }
 
 
+const remove = async (ctx,next) => {
+
+    const idpartido=ctx.params.id;
+
+    const sal = await db.transaction(async function (trx) {
+        try {
+            
+            await trx('partidoxpistaxmarcador').where({idpartido}).del();                 
+            await trx('partidoxpista').where({idpartido}).del();                 
+            await trx('partidoxpareja').where({idpartido}).del(); 
+            await trx('partidoxjugador').where({idpartido}).del(); 
+            await trx('partido').where('id',idpartido).del();   
+           
+
+        } catch (err) {
+            await  ctx.throw(401, err.message);
+        }
+    });
+    ctx.state['body'] ={data : sal, error: false};
+
+}
+
 
 const prueba = async (ctx,next) => {
 
@@ -300,7 +294,7 @@ exports.register = function(router){
     router.get('/partidos/:id', awaitErorrHandlerFactory(getById));
     router.post('/partidos', bodyParser(), awaitErorrHandlerFactory(addPartido)); 
     router.put('/partidos', bodyParser(),  awaitErorrHandlerFactory(updatePartido)); 
-
+    router.delete('/partidos/:id', bodyParser(), awaitErorrHandlerFactory(remove));
     router.post('/partidosxpistaxmarcador', bodyParser(), awaitErorrHandlerFactory(addpartidosxpistaxmarcador)); 
 
 

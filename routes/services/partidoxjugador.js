@@ -196,8 +196,6 @@ const remove = async (ctx,next) => {
 
             }
 
-
-
         } catch (err) {
             await  ctx.throw(401, err.message);
         }

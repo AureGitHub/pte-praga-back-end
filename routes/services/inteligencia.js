@@ -115,7 +115,7 @@ const hacerparejasByIdpartido = async (ctx,next) => {
             
             //hago las parejas
             // borro antes de procesar
-           
+            await trx('partidoxpistaxmarcador').where({idpartido}).del(); 
             await trx('partidoxpista').where({idpartido}).del(); 
             await trx('partidoxpareja').where({idpartido}).del(); 
            
