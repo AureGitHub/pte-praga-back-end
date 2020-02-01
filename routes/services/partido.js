@@ -76,7 +76,7 @@ const getAll = async (ctx,next) => {
     pj.id as idpartidoxjugador
     from partido p
     left join partidoxjugador pj on p.id = pj.idpartido and pj.idjugador = ?
-    order by dia desc`;
+    order by p.id desc`;
 
     const partidos = await db.raw(sql,idUser);
     ctx.state['body'] ={data : partidos.rows, error: false};    
