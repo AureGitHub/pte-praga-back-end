@@ -52,6 +52,26 @@ if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'posicion'
 		drop TABLE posicion;
 end if;
 
+
+if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxjugador_estado') THEN
+		drop TABLE partidoxjugador_estado;
+end if;
+
+if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partido_estado') THEN
+		drop TABLE partido_estado;
+end if;
+
+
+
+
+CREATE TABLE partidoxjugador_estado
+ (id  serial PRIMARY KEY, 
+ descripcion TEXT NOT NULL );
+
+CREATE TABLE partido_estado
+ (id  serial PRIMARY KEY, 
+ descripcion TEXT NOT NULL );
+
 CREATE TABLE jugador_estado
  (id  serial PRIMARY KEY, 
  descripcion TEXT NOT NULL );
@@ -90,12 +110,15 @@ CREATE TABLE jugador_confirmar
 CREATE TABLE partido 
 (id serial PRIMARY KEY,
 idcreador INTEGER, 
+idpartido_estado INTEGER NOT NULL, 
 dia timestamp with time zone NOT NULL,
 duracion NUMERIC NOT NULL,
 pistas INTEGER NOT NULL, 
 jugadorestotal INTEGER NOT NULL, 
 jugadoresapuntados INTEGER NOT NULL, 
-FOREIGN KEY(idcreador) REFERENCES jugador(id) );
+FOREIGN KEY(idcreador) REFERENCES jugador(id),
+FOREIGN KEY(idpartido_estado) REFERENCES partido_estado(id)
+);
 
 CREATE TABLE partidoxjugador 
 (id SERIAL PRIMARY KEY, 

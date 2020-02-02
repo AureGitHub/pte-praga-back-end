@@ -28,6 +28,23 @@ exports.secure =[
     },
 
     {
+        _matchedRoute : '/partidos_cierre/:id',
+        esPublico: false,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']}
+        ]
+    },
+
+    {
+        _matchedRoute : '/partidos_finaliza/:id',
+        esPublico: false,
+        perfiles : [
+            {idperfil : 1,  permisos : ['A']}
+        ]
+    },
+
+
+    {
         _matchedRoute : '/partidoxjugadorAddArray',
         esPublico: false,
         perfiles : [

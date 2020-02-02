@@ -1,4 +1,12 @@
 
+
+alter table partido add  idpartido_estado  INTEGER NOT NULL DEFAULT 1;
+
+ALTER TABLE partido
+    ADD CONSTRAINT fk_partido_estado FOREIGN KEY (idpartido_estado) REFERENCES partido_estado (id);
+
+
+
 -- **********************************************************
 -- 16/01/2020  EN PRODUCCION : SI
 

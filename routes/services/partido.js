@@ -68,6 +68,7 @@ const getAll = async (ctx,next) => {
     const sql = `select 
     p.id,
     p.idcreador,
+    p.idpartido_estado,
     to_char("dia", 'DD/MM/YYYY HH24:MI') as dia,    
     p.duracion,
     p.pistas,
@@ -92,6 +93,7 @@ const getById = async (ctx,next) => {
     const sql = `select 
     p.id,
     p.idcreador,
+    p.idpartido_estado,
     to_char("dia", 'DD/MM/YYYY HH24:MI') as dia,    
     p.duracion,
     p.pistas,
@@ -133,6 +135,7 @@ const addPartido = async (ctx,next) => {
     NewPartido.jugadorestotal = parseInt(NewPartido.pistas) * 4;
     delete NewPartido.id;
     NewPartido.jugadoresapuntados = 0;    
+    NewPartido['idpartido_estado'] = 1;
     NewPartido['id'] = await db('partido').insert(NewPartido);
     ctx.state['body'] ={data : NewPartido, error: false};
 }
@@ -192,7 +195,7 @@ const updatePartido = async (ctx,next) => {
 
                     for (let index = 0; index < LosQuePuedoPasar; index++){
                         if(suplentes.rows[index]){
-                            await db('partidoxjugador').where({id : suplentes.rows[index].id })
+                            await trx('partidoxjugador').where({id : suplentes.rows[index].id })
                             .update('idpartidoxjugador_estado',1); 
                         } 
                     }
@@ -213,12 +216,12 @@ const updatePartido = async (ctx,next) => {
 
                     for (let index = 0; index < cuantosAceptadosDescienden; index++){
                         if(aceptados.rows[index]){
-                            await db('partidoxjugador').where({id : aceptados.rows[index].id })
+                            await trx('partidoxjugador').where({id : aceptados.rows[index].id })
                             .update('idpartidoxjugador_estado',2); 
                         }
                     }
                 }
-                await db('partido').where('id',partido.id).update(partido); 
+                await trx('partido').where('id',partido.id).update(partido); 
 
             } catch (err) {
                 await  ctx.throw(401, err.message);
@@ -260,6 +263,18 @@ const remove = async (ctx,next) => {
 }
 
 
+const cierra = async (ctx,next) => {
+    const id=ctx.params.id;
+    const sal = await db('partido').where({id}).update('idpartido_estado', 2); 
+    ctx.state['body'] ={data : sal, error: false};
+}
+
+const finaliza = async (ctx,next) => {
+    const id=ctx.params.id;
+    const sal = await db('partido').where({id}).update('idpartido_estado', 3); 
+    ctx.state['body'] ={data : sal, error: false};
+}
+
 const prueba = async (ctx,next) => {
 
 var helper = require('sendgrid').mail;
@@ -296,6 +311,9 @@ exports.register = function(router){
     router.put('/partidos', bodyParser(),  awaitErorrHandlerFactory(updatePartido)); 
     router.delete('/partidos/:id', bodyParser(), awaitErorrHandlerFactory(remove));
     router.post('/partidosxpistaxmarcador', bodyParser(), awaitErorrHandlerFactory(addpartidosxpistaxmarcador)); 
+
+    router.get('/partidos_cierre/:id', awaitErorrHandlerFactory(cierra));
+    router.get('/partidos_finaliza/:id', awaitErorrHandlerFactory(finaliza));
 
 
    

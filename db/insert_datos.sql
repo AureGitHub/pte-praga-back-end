@@ -29,6 +29,15 @@ insert into jugador_estado (descripcion)
 insert into jugador_estado (descripcion) 
     values('activo');
 
+
+insert into partido_estado (descripcion) 
+    values('abierto');
+insert into partido_estado (descripcion) 
+    values('cerrado');
+    insert into partido_estado (descripcion) 
+    values('finalizado');
+
+
 insert into jugador (alias, nombre, email,passwordhash,idperfil,idposicion, idestado)
     values('aure1','J. Aurelio de Sande','aure@gmail.es','$2a$10$x4KulBC1xzSts.IT7lBCxe2THfZVsfNaZz0drdQWLKaV1yEhpE8fm',1,2,4);
 insert into jugador (alias, nombre, email,passwordhash,idperfil,idposicion, idestado)
