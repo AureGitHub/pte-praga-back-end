@@ -8,6 +8,12 @@ if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxp
 		drop TABLE partidoxpistaxmarcador;
 end if;
 
+if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxpistaxranking') THEN
+		drop TABLE partidoxpistaxranking;
+end if;
+
+
+
 
 if EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'partidoxpista') THEN
 		drop TABLE partidoxpista;
@@ -170,6 +176,22 @@ CREATE TABLE partidoxpistaxmarcador(
 	FOREIGN KEY (idpartido) REFERENCES partido(id),
 	FOREIGN KEY (idpartidoxpista) REFERENCES partidoxpista(id)	
 );
+
+
+CREATE TABLE partidoxpistaxranking(
+	id serial PRIMARY KEY,
+	idpartido INTEGER NOT NULL,
+	idpartidoxpista INTEGER NOT NULL,	
+	iddrive  INTEGER NOT NULL,	
+    idreves  INTEGER NOT NULL,	
+	juegos  INTEGER NOT NULL,	
+	gana  INTEGER NOT NULL,	
+	FOREIGN KEY (idpartido) REFERENCES partido(id),
+	FOREIGN KEY (idpartidoxpista) REFERENCES partidoxpista(id),
+	 FOREIGN KEY (iddrive) REFERENCES jugador(id),
+	 FOREIGN KEY (idreves)  REFERENCES jugador(id)
+);
+
 
 
 
