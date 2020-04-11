@@ -4,7 +4,7 @@ const awaitErorrHandlerFactory=require('../interceptor').awaitErorrHandlerFactor
 
 
 
-
+// en v1
 const getpartidoxpistaxrankingByIdpartido = async (ctx,next) => {    
 
     const idpartido= parseInt(ctx.params.id);
@@ -22,7 +22,7 @@ const getpartidoxpistaxrankingByIdpartido = async (ctx,next) => {
 
 }
 
-
+// en v1
 const getpartidoxpistaByIdpartido = async (ctx,next) => {    
     const idpartido= parseInt(ctx.params.id);
     const sql = `select 
@@ -74,7 +74,7 @@ const getpartidoxpistaByIdpartido = async (ctx,next) => {
 
 }
 
-
+// en v1
 const getAll = async (ctx,next) => {
 
 
