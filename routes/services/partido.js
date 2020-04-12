@@ -102,7 +102,7 @@ const getAll = async (ctx,next) => {
     const partidos = await db.raw(sql,idUser);
     ctx.state['body'] ={data : partidos.rows, error: false};    
 }
-
+// en v1
 const getById = async (ctx,next) => {
 
      const id=ctx.params.id;
@@ -128,6 +128,7 @@ const getById = async (ctx,next) => {
 
 }
 
+// en v1
 const addpartidosxpistaxmarcador= async (ctx,next) => {
 
     const item = ctx.request.body;
@@ -148,7 +149,7 @@ const addpartidosxpistaxmarcador= async (ctx,next) => {
     
 }
 
-
+// en v1
 const addPartido = async (ctx,next) => {
     const NewPartido = ctx.request.body;
 
@@ -159,7 +160,7 @@ const addPartido = async (ctx,next) => {
     NewPartido['id'] = await db('partido').insert(NewPartido);
     ctx.state['body'] ={data : NewPartido, error: false};
 }
-
+// en v1
 const updatePartido = async (ctx,next) => {
     try{
 
@@ -259,7 +260,7 @@ const updatePartido = async (ctx,next) => {
     }
 }
 
-
+// en v1
 const remove = async (ctx,next) => {
 
     const idpartido=ctx.params.id;
@@ -282,13 +283,14 @@ const remove = async (ctx,next) => {
 
 }
 
-
+// Desaparece : se debe utilizar updateOne!!!!
 const cierra = async (ctx,next) => {
     const id=ctx.params.id;
     const sal = await db('partido').where({id}).update('idpartido_estado', 2); 
     ctx.state['body'] ={data : sal, error: false};
 }
 
+// Desaparece : se debe utilizar updateOne!!!!
 const finaliza = async (ctx,next) => {
     const id=ctx.params.id;
 
